@@ -1,2 +1,1 @@
-print('helo')
-Yo ivan love pp
+weeb
