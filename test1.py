@@ -1,2 +1,1 @@
-print('helo')
-Yo hello
+weebs
