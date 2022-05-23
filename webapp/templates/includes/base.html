@@ -15,11 +15,13 @@
 </head>
 <body class="bg-light">
     {% include 'includes/navbar.html' %}
-    {% include 'includes/search.html' %}
+    {% if search %}
+        {% include 'includes/search.html' %}
+    {% endif %}
+    {% block content %}
+    {% endblock content %}
     <div class="container-fluid d-flex justify-content-center mt-5">
         <div class="col-10 bg-white mt-5" id="content">
-            {% block content %}
-            {% endblock content %}
         </div>
     </div>
     <!-- Bootstrap  -->
