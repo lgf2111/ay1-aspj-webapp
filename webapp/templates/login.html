@@ -1,1 +1,30 @@
 {% extends 'includes/base.html' %}
+{% block content %}
+<h1 class="text-center my-4">Login</h1>
+<div class="content-section">
+    <form action="" method="post"> 
+        {% for field in form %}
+        <div class="form-group my-2 mx-5">
+            {% if field == form.csrf_token %}
+            {{ form.hidden_tag() }}
+            {% elif field == form.submit %}
+            <a href="" class="small">Forgotten password?</a>
+            {{ form.submit(class="btn btn-primary form-control my-3") }}
+            {% else %}
+            {{ field.label(class="form-control-label") }}
+                {% if field.errors %}
+                {{ field(class="form-control is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in field.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ field(class="form-control") }}
+                {% endif %}
+            {% endif %}
+        </div>
+        {% endfor %}
+    </form>
+</div>
+{% endblock content %}

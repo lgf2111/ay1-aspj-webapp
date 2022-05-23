@@ -1,5 +1,6 @@
 from flask import render_template
 from webapp import app
+from webapp.forms import LoginForm
 
 @app.route('/')
 def index():
@@ -7,8 +8,7 @@ def index():
 
 @app.route('/login')
 def login():
-    return render_template('login.html', title='Login')
-
-@app.route('/gfllf')
-def login():
-    return render_template('gfllf.html', title='gfllf')
+    form = LoginForm()
+    if form.validate_on_submit():
+        pass
+    return render_template('login.html', title='Login', form=form)
