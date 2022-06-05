@@ -1,10 +1,25 @@
 {% extends 'includes/base.html' %}
 {% block content %}
-<h1 class="text-center my-4">Login</h1>
+<h1 class="text-center my-4">Register</h1>
 <div class="content-section pb-4">
     <form action="" method="post"> 
         {{ form.hidden_tag() }}
-
+        
+        <!-- Username -->
+        <div class="form-group my-2 mx-5">
+            {{ form.username.label(class="form-control-label") }}
+            {% if form.username.errors %}
+            {{ form.username(class="form-control is-invalid") }}
+            <div class="invalid-feedback">
+                {% for error in form.username.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            {{ form.username(class="form-control") }}
+            {% endif %}
+        </div>
+        
         <!-- Email -->
         <div class="form-group my-2 mx-5">
             {{ form.email.label(class="form-control-label") }}
@@ -32,6 +47,21 @@
             </div>
             {% else %}
             {{ form.password(class="form-control") }}
+            {% endif %}
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group my-2 mx-5">
+            {{ form.confirm_password.label(class="form-control-label") }}
+            {% if form.confirm_password.errors %}
+            {{ form.confirm_password(class="form-control is-invalid") }}
+            <div class="invalid-feedback">
+                {% for error in form.confirm_password.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            {{ form.confirm_password(class="form-control") }}
             {% endif %}
         </div>
 

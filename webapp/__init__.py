@@ -8,6 +8,7 @@ from flask_talisman import Talisman
 
 app = Flask(__name__)
 # Talisman(app) # Security Misconfiguration (https://flask.palletsprojects.com/en/2.1.x/security/)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'd4c39371a9cfbee4c7f47cad1979a0'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db = SQLAlchemy(app)
