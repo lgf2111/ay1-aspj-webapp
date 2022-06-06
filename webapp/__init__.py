@@ -5,6 +5,9 @@ from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 # from werkzeug.datastructures import ImmutableDict
 from flask_talisman import Talisman
+import logging
+
+logging.basicConfig(filename='./record.log', level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s') # Insufficient Logging & Monitoring
 
 app = Flask(__name__)
 # Talisman(app) # Security Misconfiguration (https://flask.palletsprojects.com/en/2.1.x/security/)
