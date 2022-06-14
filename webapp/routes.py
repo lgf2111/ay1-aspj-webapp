@@ -1,9 +1,8 @@
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_user, current_user, logout_user, login_required
-# from webapp import app, bcrypt, db
-from webapp import app, db
-from webapp.forms import LoginForm, RegistrationForm
-from webapp.models import User
+from webapp import app, bcrypt, db
+from webapp.forms import LoginForm, RegistrationForm, BookForm
+from webapp.models import User, Book
 
 
 @app.route('/')
@@ -16,8 +15,8 @@ def register():
         return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        # hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        # user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
         user = User(username=form.username.data, email=form.email.data, password=form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -32,8 +31,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        # if user and bcrypt.check_password_hash(user.password, form.password.data):
-        if user and user.password == form.password.data:
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
             flash('Login Successful.', 'success')
             app.logger.info(f"{user.username} logged in successfully.")
@@ -53,6 +51,19 @@ def logout():
 @login_required
 def account():
     return render_template('account.html', title='Account')
+
+@app.route("/book/new")
+@login_required
+def new_book():
+    form = BookForm()
+    if form.validate_on_submit():
+        book = Book(title=form.title.data, content=form.content.data, author=current_user)
+        db.session.add(book)
+        db.session.commit()
+        flash('Your book has been created!', 'success')
+        return redirect(url_for('home'))
+    return render_template('create_book.html', title='New Book',
+                           form=form, legend='New Book')
 
 @app.route("/admin/dashboard")
 @login_required

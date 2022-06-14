@@ -1,0 +1,45 @@
+{% extends 'includes/base.html' %}
+{% block content %}
+<h1 class="text-center my-4">New Book</h1>
+<div class="content-section pb-4">
+    <form action="" method="post"> 
+        {{ form.hidden_tag() }}
+        
+        <!-- Title -->
+        <div class="form-group my-2 mx-5">
+            {{ form.title.label(class="form-control-label") }}
+            {% if form.title.errors %}
+                {{ form.title(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.title.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.title(class="form-control form-control-lg") }}
+            {% endif %}
+        </div>
+        
+        <!-- Content -->
+        <div class="form-group my-2 mx-5">
+            {{ form.content.label(class="form-control-label") }}
+            {% if form.content.errors %}
+                {{ form.content(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.content.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.content(class="form-control form-control-lg") }}
+            {% endif %}
+        </div>
+        
+        <!-- Submit -->
+        <div class="form-group my-2 mx-5">
+            {{ form.submit(class="btn btn-primary form-control my-3") }}
+        </div>
+
+    </form>
+</div>
+{% endblock content %}
