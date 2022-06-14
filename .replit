@@ -1,2 +1,0 @@
-language = "python3"
-run = "pip install email_validator;pip install --upgrade 'sentry-sdk[flask]';export FLASK_APP=webapp/__init__;flask run --host=0.0.0.0"
