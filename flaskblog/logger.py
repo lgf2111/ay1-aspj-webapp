@@ -1,4 +1,10 @@
 import logging
+import os
+from pathlib import Path
+
+parent_dir = Path(__file__).parent.parent
+logs_dir = os.path.join(parent_dir, 'logs')
+if not os.path.exists(logs_dir): os.mkdir(logs_dir)
 
 def setup_logger(name, log_file, level=logging.INFO):
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
@@ -11,3 +17,6 @@ def setup_logger(name, log_file, level=logging.INFO):
     logger.addHandler(file_handler)
     logger.addHandler(stream_handler)
     return logger
+
+if __name__ == '__main__':
+    print(logs_dir)
