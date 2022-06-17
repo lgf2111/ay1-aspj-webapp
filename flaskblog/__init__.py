@@ -4,6 +4,8 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mail import Mail
 from flaskblog.config import Config
+from flaskblog.logger import setup_logger
+
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -11,6 +13,15 @@ login_manager = LoginManager()
 login_manager.login_view = 'users.login'
 login_manager.login_message_category = 'info'
 mail = Mail()
+root_logger = setup_logger('', 'logs/records.log')
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s',
+#     handlers=[
+#         logging.FileHandler("record.log"),
+#         logging.StreamHandler()
+#     ]
+# )
 
 
 def create_app(config_class=Config):
