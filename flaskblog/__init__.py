@@ -3,8 +3,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mail import Mail
-from flaskblog.config import Config
 from flaskblog.logger import setup_logger
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flaskblog.config import Config
 
 
 db = SQLAlchemy()
@@ -13,6 +15,7 @@ login_manager = LoginManager()
 login_manager.login_view = 'users.login'
 login_manager.login_message_category = 'info'
 mail = Mail()
+limiter = Limiter(key_func=get_remote_address)
 root_logger = setup_logger('', 'logs/records.log')
 # logging.basicConfig(
 #     level=logging.INFO,
@@ -32,6 +35,7 @@ def create_app(config_class=Config):
     bcrypt.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
+    limiter.init_app(app)
 
     from flaskblog.users.routes import users
     from flaskblog.posts.routes import posts
