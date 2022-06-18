@@ -163,7 +163,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 
 [[package]]
 name = "itsdangerous"
-version = "2.1.2"
+version = "2.0.0"
 description = "Safely pass data to untrusted environments and back."
 category = "main"
 optional = false
@@ -282,7 +282,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "b71cd85124092f876aedaa78e5c9b456d9c9433143ea4731991fdcd7beffb750"
+content-hash = "1c33416dbcf67257d9bea944cb812d9343b0e3c42e43cb019211cc5a3f6350fd"
 
 [metadata.files]
 bcrypt = [
