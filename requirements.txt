@@ -10,3 +10,4 @@ Pillow==9.1.1
 python-dotenv==0.20.0
 WTForms==3.0.1
 Flask-Mail==0.9.1
+Werkzeug==2.0.2
