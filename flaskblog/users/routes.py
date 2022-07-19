@@ -25,18 +25,24 @@ def register():
 
 
 @users.route("/login", methods=['GET', 'POST'])
-# @limiter.limit("1/minute")
+# @limiter.limit("5/minute")
 def login():
     if current_user.is_authenticated:
+        flash("You're already logged in!")
         return redirect(url_for('main.home'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        if user and bcrypt.check_password_hash(user.password, form.password.data):
-            login_user(user, remember=form.remember.data)
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('main.home'))
+        if user.login_attempt > 10:
+            flash('Your account has been locked.', 'danger')
+        elif user and bcrypt.check_password_hash(user.password, form.password.data):
+                login_user(user, remember=form.remember.data)
+                user.login_attempt = 0
+                next_page = request.args.get('next')
+                return redirect(next_page) if next_page else redirect(url_for('main.home'))
         else:
+            user.login_attempt += 1
+            db.session.commit()
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title='Login', form=form)
 
@@ -103,7 +109,9 @@ def reset_token(token):
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user.password = hashed_password
+        user.login_attempt = 0
         db.session.commit()
         flash('Your password has been updated! You are now able to log in', 'success')
         return redirect(url_for('users.login'))
     return render_template('reset_token.html', title='Reset Password', form=form)
+
