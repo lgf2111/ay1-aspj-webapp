@@ -20,6 +20,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         flash('Your account has been created! You are now able to log in', 'success')
+        users_logger.info(f"User Registered: {user.username}")
         return redirect(url_for('users.login'))
     return render_template('register.html', title='Register', form=form)
 
@@ -35,8 +36,10 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user.login_attempt > 10:
             flash('Your account has been locked.', 'danger')
+            users_logger.info(f"Login Attempt {user.login_attempt} (Locked): {user.username}")
         elif user and bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user, remember=form.remember.data)
+                users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
                 user.login_attempt = 0
                 next_page = request.args.get('next')
                 return redirect(next_page) if next_page else redirect(url_for('main.home'))
@@ -44,12 +47,14 @@ def login():
             user.login_attempt += 1
             db.session.commit()
             flash('Login Unsuccessful. Please check email and password', 'danger')
+            users_logger.info(f"Login Attempt {user.login_attempt} (Unuccessful): {user.username}")
     return render_template('login.html', title='Login', form=form)
 
 
 @users.route("/logout")
 def logout():
     logout_user()
+    users_logger.info(f"User Logged Out: {current_user.username}")
     return redirect(url_for('main.home'))
 
 
@@ -92,8 +97,8 @@ def reset_request():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         link = send_reset_email(user)
+        users_logger.info(f"Password Reset Request: {user.username}, {link}")
         flash('An email has been sent with instructions to reset your password.', 'info')
-        users_logger.info(f"Reset Password: {user.username}, {link}")
         return redirect(url_for('users.login'))
     return render_template('reset_request.html', title='Reset Password', form=form)
 
@@ -112,6 +117,7 @@ def reset_token(token):
         user.password = hashed_password
         user.login_attempt = 0
         db.session.commit()
+        users_logger.info(f"Password Resetted: {user.username}")
         flash('Your password has been updated! You are now able to log in', 'success')
         return redirect(url_for('users.login'))
     return render_template('reset_token.html', title='Reset Password', form=form)
