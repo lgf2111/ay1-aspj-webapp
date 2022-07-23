@@ -26,7 +26,6 @@ def register():
 
 
 @users.route("/login", methods=['GET', 'POST'])
-# @limiter.limit("5/minute")
 def login():
     if current_user.is_authenticated:
         flash("You're already logged in!")
@@ -36,7 +35,10 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user.login_attempt > 10:
             flash('Your account has been locked.', 'danger')
-            users_logger.info(f"Login Attempt {user.login_attempt} (Locked): {user.username}")
+            if user.login_attempt <= 15:
+                users_logger.warning(f"Login Attempt {user.login_attempt} (Locked): {user.username}")
+            else:
+                users_logger.error(f"Login Attempt {user.login_attempt} (Locked): {user.username}")
         elif user and bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user, remember=form.remember.data)
                 users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
@@ -47,14 +49,15 @@ def login():
             user.login_attempt += 1
             db.session.commit()
             flash('Login Unsuccessful. Please check email and password', 'danger')
-            users_logger.info(f"Login Attempt {user.login_attempt} (Unuccessful): {user.username}")
+            users_logger.warning(f"Login Attempt {user.login_attempt} (Unuccessful): {user.username}")
     return render_template('login.html', title='Login', form=form)
 
 
 @users.route("/logout")
 def logout():
+    username = current_user.username
     logout_user()
-    users_logger.info(f"User Logged Out: {current_user.username}")
+    users_logger.info(f"User Logged Out: {username}")
     return redirect(url_for('main.home'))
 
 
@@ -70,6 +73,7 @@ def account():
         current_user.email = form.email.data
         db.session.commit()
         flash('Your account has been updated!', 'success')
+        users_logger.info(f'User Account Updated: {current_user.username}')
         return redirect(url_for('users.account'))
     elif request.method == 'GET':
         form.username.data = current_user.username
