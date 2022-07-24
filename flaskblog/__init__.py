@@ -20,16 +20,9 @@ login_manager.login_message_category = 'info'
 admin = Admin(name='Flask Blog', template_mode='bootstrap3')
 mail = Mail()
 limiter = Limiter(key_func=get_remote_address)
-root_logger = setup_logger('', 'logs/records.log')
+root_logger = setup_logger('', 'logs/root.log')
 users_logger = setup_logger('users', 'logs/users.log')
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s',
-#     handlers=[
-#         logging.FileHandler("record.log"),
-#         logging.StreamHandler()
-#     ]
-# )
+posts_logger = setup_logger('posts', 'logs/posts.log')
 
 
 def create_app(config_class=Config):

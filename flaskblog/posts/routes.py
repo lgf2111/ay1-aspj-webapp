@@ -1,7 +1,7 @@
 from flask import (render_template, url_for, flash,
                    redirect, request, abort, Blueprint)
 from flask_login import current_user, login_required
-from flaskblog import db
+from flaskblog import db, posts_logger
 from flaskblog.models import Post
 from flaskblog.posts.forms import PostForm
 
@@ -17,6 +17,8 @@ def new_post():
         db.session.add(post)
         db.session.commit()
         flash('Your post has been created!', 'success')
+        link = url_for('posts.post', post_id=post.id, _external=True)
+        posts_logger.info(f"Post Created ({current_user.username}): {link}")
         return redirect(url_for('main.home'))
     return render_template('posts/create_post.html', title='New Post',
                            form=form, legend='New Post')
@@ -33,6 +35,8 @@ def post(post_id):
 def update_post(post_id):
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
+        link = url_for('posts.post', post_id=post.id, _external=True)
+        posts_logger.warning(f"Post Edit Attempt ({current_user.username}): {link}")
         abort(403)
     form = PostForm()
     if form.validate_on_submit():
@@ -40,6 +44,8 @@ def update_post(post_id):
         post.content = form.content.data
         db.session.commit()
         flash('Your post has been updated!', 'success')
+        link = url_for('posts.post', post_id=post.id, _external=True)
+        posts_logger.info(f"Post Edited ({current_user.username}): {link}")
         return redirect(url_for('posts.post', post_id=post.id))
     elif request.method == 'GET':
         form.title.data = post.title
@@ -57,4 +63,5 @@ def delete_post(post_id):
     db.session.delete(post)
     db.session.commit()
     flash('Your post has been deleted!', 'success')
+    posts_logger.info(f"Post Deleted ({current_user.username}): {post}")
     return redirect(url_for('main.home'))
