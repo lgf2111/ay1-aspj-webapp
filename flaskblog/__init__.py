@@ -1,4 +1,5 @@
 from flask import Flask
+import flask_monitoringdashboard as dashboard
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
@@ -28,7 +29,8 @@ posts_logger = setup_logger('posts', 'logs/posts.log')
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(Config)
-
+    dashboard.config.init_from(file='monitor/config.cfg')
+    dashboard.bind(app)
     db.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
