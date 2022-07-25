@@ -32,24 +32,26 @@ def login():
         return redirect(url_for('main.home'))
     form = LoginForm()
     if form.validate_on_submit():
+        output = lambda login_attempt, state, username: f"Login Attempt {login_attempt} ({state}): {username}"
         user = User.query.filter_by(email=form.email.data).first()
-        if user.login_attempt > 10:
-            flash('Your account has been locked.', 'danger')
-            if user.login_attempt <= 15:
-                users_logger.warning(f"Login Attempt {user.login_attempt} (Locked): {user.username}")
-            else:
-                users_logger.error(f"Login Attempt {user.login_attempt} (Locked): {user.username}")
-        elif user and bcrypt.check_password_hash(user.password, form.password.data):
-                login_user(user, remember=form.remember.data)
-                users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
-                user.login_attempt = 0
-                next_page = request.args.get('next')
-                return redirect(next_page) if next_page else redirect(url_for('main.home'))
+        if user and bcrypt.check_password_hash(user.password, form.password.data) and user.login_attempt <= 10:
+            login_user(user, remember=form.remember.data)
+            users_logger.info(output(user.login_attempt, 'Successful', user.username))
+            user.login_attempt = 0
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('main.home'))
         else:
             user.login_attempt += 1
             db.session.commit()
-            flash('Login Unsuccessful. Please check email and password', 'danger')
-            users_logger.warning(f"Login Attempt {user.login_attempt} (Unuccessful): {user.username}")
+            if user.login_attempt > 10:
+                flash('Your account has been locked.', 'danger')
+                if user.login_attempt <= 15:
+                    users_logger.warning(output(user.login_attempt, 'Locked', user.username))
+                else:
+                    users_logger.error(output(user.login_attempt, 'Locked', user.username))
+            else:
+                flash('Login Unsuccessful. Please check email and password', 'danger')
+                users_logger.warning(output(user.login_attempt, 'Unsuccessful', user.username))
     return render_template('users/login.html', title='Login', form=form)
 
 
