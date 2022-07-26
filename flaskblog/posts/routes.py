@@ -2,7 +2,7 @@ from flask import (render_template, url_for, flash,
                    redirect, request, abort, Blueprint)
 from flask_login import current_user, login_required
 from flaskblog import db
-from flaskblog.models import Post
+from flaskblog.models import Post, Comment
 from flaskblog.posts.forms import PostForm
 
 posts = Blueprint('posts', __name__)
@@ -58,3 +58,22 @@ def delete_post(post_id):
     db.session.commit()
     flash('Your post has been deleted!', 'success')
     return redirect(url_for('main.home'))
+
+
+@posts.route('/post/<int:post_id>/comment/new', methods=['GET', 'POST'])
+@login_required
+def new_comment(post_id):
+    text = request.form.get('text')
+
+    if not text:
+        flash('Comment cannot be empty', 'error')
+    else:
+        # post = Post.query.filter_by(id=post.id)
+        if post:
+            comment = Comment(text=text, author=current_user.id, post_id=post_id)
+            db.session.add(comment)
+            db.session.commit()
+        else: 
+            flash('Post do not exist.', 'error')
+    return redirect(url_for('main.home'))
+

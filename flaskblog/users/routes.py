@@ -1,10 +1,11 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_login import login_user, current_user, logout_user, login_required
 from flaskblog import db, bcrypt, limiter, users_logger
-from flaskblog.models import User, Post
+from flaskblog.models import User, Post, Role, UserRoles
 from flaskblog.users.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
                                    RequestResetForm, ResetPasswordForm)
 from flaskblog.users.utils import save_picture, send_reset_email
+from flask_babelex import Babel
 
 users = Blueprint('users', __name__)
 
@@ -32,7 +33,22 @@ def login():
         return redirect(url_for('main.home'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        # user = User.query.filter_by(email=form.email.data).first()
+        if not User.query.filter(User.email == 'member@example.com').first():
+            user = User(
+            email='member@example.com'
+        )
+        db.session.add(user)
+        db.session.commit() 
+        # Create 'admin@example.com' user with 'Admin' and 'Agent' roles
+        if not User.query.filter(User.email == 'admin@example.com').first():
+            user = User(
+                email='admin@example.com'
+            )
+            user.roles.append(Role(name='Admin'))
+            user.roles.append(Role(name='Agent'))
+            db.session.add(user)
+            db.session.commit()
         if user.login_attempt > 10:
             flash('Your account has been locked.', 'danger')
             if user.login_attempt <= 15:
@@ -126,3 +142,9 @@ def reset_token(token):
         return redirect(url_for('users.login'))
     return render_template('reset_token.html', title='Reset Password', form=form)
 
+
+@users.route('admin')
+@login_required
+@roles_required('Admin')
+def admin():
+    return render_template('index.html')
