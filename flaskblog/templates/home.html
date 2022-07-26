@@ -10,10 +10,39 @@
             </div>
             <h2><a class="article-title" href="{{ url_for('posts.post', post_id=post.id) }}">{{ post.title }}</a></h2>
             <p class="article-content">{{ post.content }}</p>
-            <form class="input-group md-3" method="POST" action="{{ url_for('posts.new_comment', post_id=post.id) }}">
-              <input type="text" id="text" name="text" class="form-control" placeholder="Comment Something"/>
-              <button type="submit" class="btn btn-primary">Comment</button>
-            </form>
+            <div class="border">
+              <h3 class="px-2 py-2">Comments</h3>
+              {% if post.comments %}
+                {% if post.comments | length == 1 %}
+                  {% for comment in post.comments %}
+                  <div class="card mx-1 my-2">
+                    <div class="card-body">
+                      <a class="h5 card-title" href="{{ url_for('users.user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
+                      <p class="card-text">{{ comment.content }}</p>
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% else %}
+                  {% for comment in post.comments[:1] %}
+                  <div class="card mx-1 my-2">
+                    <div class="card-body">
+                      <a class="h5 card-title" href="{{ url_for('users.user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
+                      <p class="card-text">{{ comment.content }}</p>
+                    </div>
+                  </div>
+                  <a href="{{ url_for('posts.post', post_id=post.id) }}" class="small mx-2">View more...</a>
+                  {% endfor %}
+                {% endif %}
+              {% else %}
+                <p>No Comments Currently...</p>
+              {% endif %}
+              <div class="mx-2 my-1">
+                <form class="input-group" method="POST" action="{{ url_for('posts.new_comment', post_id=post.id) }}">
+                  <input type="text" id="content" name="content" class="form-control" placeholder="Comment Something"/>
+                  <button type="submit" class="btn btn-primary">Comment</button>
+                </form>
+              </div>
+            </div>
           </div>
         </article>
     {% endfor %}

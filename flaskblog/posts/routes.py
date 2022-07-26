@@ -63,14 +63,14 @@ def delete_post(post_id):
 @posts.route('/post/<int:post_id>/comment/new', methods=['GET', 'POST'])
 @login_required
 def new_comment(post_id):
-    text = request.form.get('text')
+    content = request.form.get('content')
 
-    if not text:
+    if not content:
         flash('Comment cannot be empty', 'error')
     else:
         # post = Post.query.filter_by(id=post.id)
         if post:
-            comment = Comment(text=text, author=current_user.id, post_id=post_id)
+            comment = Comment(content=content, user_id=current_user.id, post_id=post_id)
             db.session.add(comment)
             db.session.commit()
         else: 

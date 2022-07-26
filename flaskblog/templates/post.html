@@ -15,6 +15,28 @@
       </div>
       <h2 class="article-title">{{ post.title }}</h2>
       <p class="article-content">{{ post.content }}</p>
+      <div class="border">
+        <h3 class="px-2 py-2">Comments</h3>
+        {% if post.comments %}
+            {% for comment in post.comments %}
+            <div class="card mx-1 my-2">
+              <div class="card-body">
+                <a class="h5 card-title" href="{{ url_for('users.user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
+                <p class="card-text">{{ comment.content }}</p>
+              </div>
+            </div>
+            {% endfor %}
+        {% else %}
+          <p>No Comments Currently...</p>
+        {% endif %}
+        <div class="mx-2 my-1">
+          <form class="input-group" method="POST" action="{{ url_for('posts.new_comment', post_id=post.id) }}">
+            <input type="text" id="content" name="content" class="form-control" placeholder="Comment Something"/>
+            <button type="submit" class="btn btn-primary">Comment</button>
+          </form>
+        </div>
+      </div>
+
     </div>
   </article>
   <!-- Modal -->
