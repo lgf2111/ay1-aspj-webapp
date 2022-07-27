@@ -1,4 +1,6 @@
 from flask import Flask
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 import flask_monitoringdashboard as dashboard
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -18,7 +20,7 @@ bcrypt = Bcrypt()
 login_manager = LoginManager()
 login_manager.login_view = 'users.login'
 login_manager.login_message_category = 'info'
-admin = Admin(name='Flask Blog', template_mode='bootstrap3')
+admin = Admin(name='Flask Blog', template_mode='bootstrap4')
 mail = Mail()
 limiter = Limiter(key_func=get_remote_address)
 root_logger = setup_logger('', 'logs/root.log')
@@ -29,6 +31,13 @@ posts_logger = setup_logger('posts', 'logs/posts.log')
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(Config)
+    sentry_sdk.init(
+        dsn="https://bc8b621ab5b241bdba1939206c8a35dc@o1276780.ingest.sentry.io/6605916",
+        integrations=[
+            FlaskIntegration(),
+        ],
+        traces_sample_rate=1.0
+    )
     dashboard.config.init_from(file='monitor/config.cfg')
     dashboard.bind(app)
 
@@ -41,6 +50,7 @@ def create_app(config_class=Config):
 
     from flaskblog.models import User, Post
     class ModelView(sqla.ModelView):
+        create_template = 'admin/create.html'
         def is_accessible(self):
             if current_user.is_authenticated:
                 return current_user.role_id == 2

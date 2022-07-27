@@ -1,10 +1,10 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_login import login_user, current_user, logout_user, login_required
-from flaskblog import db, bcrypt, limiter, users_logger
+from flaskblog import db, bcrypt, users_logger
 from flaskblog.models import User, Post
 from flaskblog.users.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
                                    RequestResetForm, ResetPasswordForm)
-from flaskblog.users.utils import save_picture, send_reset_email
+from flaskblog.users.utils import save_picture, send_reset_email, send_alert_email
 
 users = Blueprint('users', __name__)
 
@@ -49,6 +49,8 @@ def login():
                     users_logger.warning(output(user.login_attempt, 'Locked', user.username))
                 else:
                     users_logger.error(output(user.login_attempt, 'Locked', user.username))
+                    if user.login_attempt in range(15,51,5):
+                        send_alert_email(f'attempt to login for more than {user.login_attempt} times', user)
             else:
                 flash('Login Unsuccessful. Please check email and password', 'danger')
                 users_logger.warning(output(user.login_attempt, 'Unsuccessful', user.username))

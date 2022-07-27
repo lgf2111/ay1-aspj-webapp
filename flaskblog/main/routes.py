@@ -15,3 +15,9 @@ def home():
 @main.route("/about")
 def about():
     return render_template('main/about.html', title='About')
+
+
+# Test Sentry
+# @main.route('/debug-sentry')
+# def trigger_error():
+#     division_by_zero = 1 / 0
