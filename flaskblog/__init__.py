@@ -1,4 +1,5 @@
 from flask import Flask
+import flask_monitoringdashboard as dashboard
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, current_user
@@ -20,21 +21,16 @@ login_manager.login_message_category = 'info'
 admin = Admin(name='Flask Blog', template_mode='bootstrap3')
 mail = Mail()
 limiter = Limiter(key_func=get_remote_address)
-root_logger = setup_logger('', 'logs/records.log')
+root_logger = setup_logger('', 'logs/root.log')
 users_logger = setup_logger('users', 'logs/users.log')
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s',
-#     handlers=[
-#         logging.FileHandler("record.log"),
-#         logging.StreamHandler()
-#     ]
-# )
+posts_logger = setup_logger('posts', 'logs/posts.log')
 
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(Config)
+    dashboard.config.init_from(file='monitor/config.cfg')
+    dashboard.bind(app)
 
     db.init_app(app)
     bcrypt.init_app(app)
@@ -47,6 +43,10 @@ def create_app(config_class=Config):
         def is_accessible(self):
             return current_user.is_authenticated
     from flaskblog.models import User, Post
+    class ModelView(sqla.ModelView):
+        def is_accessible(self):
+            if current_user.is_authenticated:
+                return current_user.role_id == 2
     admin.add_view(ModelView(User, db.session))
     admin.add_view(ModelView(Post, db.session))
 
