@@ -1,8 +1,11 @@
 from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
+from traitlets import default
 from flaskblog import db, login_manager
 from flask_login import UserMixin
+
+
 
 
 @login_manager.user_loader
@@ -18,7 +21,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     login_attempt = db.Column(db.Integer, nullable=False, default=0)
     posts = db.relationship('Post', backref='author', lazy=True)
-    roles = db.relationship('Role', secondary='user_role')
+   
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
@@ -55,14 +58,6 @@ class Comment(db.Model):
     author = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     
-class Role(db.Model):
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(50), unique=True)
-    
 
-class UserRoles(db.Model):
-    id = db.Column(db.Interger(), primary_key=True)
-    user_id = db.Column(db.Integer(), db.ForeignKey('user_id', ondelete='CASCADE'))
-    role_id = db.Column(db.Integer(), db.ForeignKey('role_id', ondelete='CASCADE'))
     
 

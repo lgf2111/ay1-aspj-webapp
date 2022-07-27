@@ -1,9 +1,9 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
+from flask_admin.contrib import sqla
 from flask_mail import Mail
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -43,6 +43,9 @@ def create_app(config_class=Config):
     mail.init_app(app)
     limiter.init_app(app)
 
+    class ModelView(sqla.ModelView):
+        def is_accessible(self):
+            return current_user.is_authenticated
     from flaskblog.models import User, Post
     admin.add_view(ModelView(User, db.session))
     admin.add_view(ModelView(Post, db.session))
