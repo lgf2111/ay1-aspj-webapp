@@ -2,9 +2,9 @@ from flask import Flask
 import flask_monitoringdashboard as dashboard
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
+from flask_admin.contrib import sqla
 from flask_mail import Mail
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -40,6 +40,10 @@ def create_app(config_class=Config):
     limiter.init_app(app)
 
     from flaskblog.models import User, Post
+    class ModelView(sqla.ModelView):
+        def is_accessible(self):
+            if current_user.is_authenticated:
+                return current_user.role_id == 2
     admin.add_view(ModelView(User, db.session))
     admin.add_view(ModelView(Post, db.session))
 
