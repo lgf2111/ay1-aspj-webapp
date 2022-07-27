@@ -29,6 +29,7 @@ posts_logger = setup_logger('posts', 'logs/posts.log')
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(Config)
+    dashboard.config.init_from(file='monitor/config.cfg')
     dashboard.bind(app)
 
     db.init_app(app)
