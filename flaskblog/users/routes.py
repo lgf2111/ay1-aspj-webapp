@@ -107,3 +107,13 @@ def reset_token(token):
         flash('Your password has been updated! You are now able to log in', 'success')
         return redirect(url_for('users.login'))
     return render_template('reset_token.html', title='Reset Password', form=form)
+
+
+# @users.route("/two_fa")
+# def two_fa():
+#     db.create_all
+#     email = current_user.email
+#     enable = MFA(email=email, mfa=True)
+#     db.session.add(enable)
+#     db.session.commit()
+#     return render_template('2FA.html', email=email)

@@ -11,3 +11,15 @@ python-dotenv==0.20.0
 WTForms==3.0.1
 Flask-Mail==0.9.1
 Werkzeug==2.0.2
+
+#session token, once login cannot hijack
+
+# once login
+
+# session for anonymous
+
+# every login, create new session
+
+# session timeout after 20 mins
+
+# logout invalidate session

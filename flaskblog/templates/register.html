@@ -38,7 +38,7 @@
                         {{ form.password(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">
                             {% for error in form.password.errors %}
-                                <span>{{ error }}</span>
+                                <span>{{ error }}</span> 
                             {% endfor %}
                         </div>
                     {% else %}
@@ -64,6 +64,7 @@
             </div>
         </form>
     </div>
+    
     <div class="border-top pt-3">
         <small class="text-muted">
             Already Have An Account? <a class="ml-2" href="{{ url_for('users.login') }}">Sign In</a>
