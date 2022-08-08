@@ -1,9 +1,12 @@
 from flask import Flask
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+import flask_monitoringdashboard as dashboard
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
+from flask_admin.contrib import sqla
 from flask_mail import Mail
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -17,24 +20,26 @@ bcrypt = Bcrypt()
 login_manager = LoginManager()
 login_manager.login_view = 'users.login'
 login_manager.login_message_category = 'info'
-admin = Admin(name='Flask Blog', template_mode='bootstrap3')
+admin = Admin(name='Flask Blog', template_mode='bootstrap4')
 mail = Mail()
 limiter = Limiter(key_func=get_remote_address)
-root_logger = setup_logger('', 'logs/records.log')
+root_logger = setup_logger('', 'logs/root.log')
 users_logger = setup_logger('users', 'logs/users.log')
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s',
-#     handlers=[
-#         logging.FileHandler("record.log"),
-#         logging.StreamHandler()
-#     ]
-# )
+posts_logger = setup_logger('posts', 'logs/posts.log')
 
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(Config)
+    sentry_sdk.init(
+        dsn="https://bc8b621ab5b241bdba1939206c8a35dc@o1276780.ingest.sentry.io/6605916",
+        integrations=[
+            FlaskIntegration(),
+        ],
+        traces_sample_rate=1.0
+    )
+    dashboard.config.init_from(file='monitor/config.cfg')
+    dashboard.bind(app)
 
     db.init_app(app)
     bcrypt.init_app(app)
@@ -44,6 +49,11 @@ def create_app(config_class=Config):
     limiter.init_app(app)
 
     from flaskblog.models import User, Post
+    class ModelView(sqla.ModelView):
+        create_template = 'admin/create.html'
+        def is_accessible(self):
+            if current_user.is_authenticated:
+                return current_user.role_id == 2
     admin.add_view(ModelView(User, db.session))
     admin.add_view(ModelView(Post, db.session))
 
