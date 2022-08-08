@@ -19,7 +19,7 @@ def register():
         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
-        flash('Your account has been created! You are now able to log in', 'success')
+        flash('Your account has been created! You are now able to log in.', 'success')
         users_logger.info(f"User Registered: {user.username}")
         return redirect(url_for('users.login'))
     return render_template('users/register.html', title='Register', form=form)
@@ -28,7 +28,6 @@ def register():
 @users.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        flash("You're already logged in!")
         return redirect(url_for('main.home'))
     form = LoginForm()
     if form.validate_on_submit():
