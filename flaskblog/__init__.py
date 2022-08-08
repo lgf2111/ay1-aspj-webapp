@@ -48,6 +48,9 @@ def create_app(config_class=Config):
     mail.init_app(app)
     limiter.init_app(app)
 
+    class ModelView(sqla.ModelView):
+        def is_accessible(self):
+            return current_user.is_authenticated
     from flaskblog.models import User, Post
     class ModelView(sqla.ModelView):
         create_template = 'admin/create.html'

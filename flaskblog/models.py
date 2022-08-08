@@ -5,6 +5,8 @@ from flaskblog import db, login_manager
 from flask_login import UserMixin
 
 
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -19,6 +21,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     login_attempt = db.Column(db.Integer, nullable=False, default=0)
     posts = db.relationship('Post', backref='author', lazy=True)
+   
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
@@ -47,6 +50,19 @@ class Post(db.Model):
 
     def __repr__(self):
         return f"Post('{self.title}', '{self.date_posted}')"
+    
+#Create Comment Database
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(200), nullable=False)
+    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    author = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    
+
+    
+
 
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
