@@ -51,7 +51,10 @@ def login():
     if form.validate_on_submit():
         output = lambda login_attempt, state, username: f"Login Attempt {login_attempt} ({state}): {username}"
         user = User.query.filter_by(email=form.email.data).first()
-        if user and bcrypt.check_password_hash(user.password, form.password.data) and user.login_attempt <= 10:
+        if not user:
+            flash('Login Unsuccessful. Please check email and password', 'danger')
+            users_logger.warning(output(0, 'Does Not Exist', form.email.data))
+        elif user and bcrypt.check_password_hash(user.password, form.password.data) and user.login_attempt <= 10:
             login_user(user, remember=form.remember.data)
             users_logger.info(output(user.login_attempt, 'Successful', user.username))
             user.login_attempt = 0
