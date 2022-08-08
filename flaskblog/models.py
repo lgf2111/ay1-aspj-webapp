@@ -1,4 +1,5 @@
 from datetime import datetime
+from email.policy import default
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 from flaskblog import db, login_manager
@@ -21,7 +22,6 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     login_attempt = db.Column(db.Integer, nullable=False, default=0)
     posts = db.relationship('Post', backref='author', lazy=True)
-   
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
