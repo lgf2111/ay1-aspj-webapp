@@ -7,7 +7,7 @@
           <h2 class="account-heading">{{ current_user.username }}</h2>
           <p class="text-secondary">{{ current_user.email }}</p>
 
-          {% if mfa_status == False %}
+          {% if not current_user.mfa %}
           <form method="" action="/enable_two_fa">
             <input type="submit" value="Enable 2FA" class="btn btn-outline-info">
           </form>

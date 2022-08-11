@@ -1,5 +1,3 @@
-from multiprocessing import AuthenticationError
-from re import U
 from flask import render_template, url_for, flash, redirect, request, Blueprint, session
 from flask_login import login_user, current_user, logout_user, login_required
 from flaskblog import db, bcrypt, users_logger
@@ -7,7 +5,6 @@ from flaskblog.models import User, Post
 from flaskblog.users.forms import (MfaForm, RegistrationForm, LoginForm, UpdateAccountForm,
                                    RequestResetForm, ResetPasswordForm, MfaForm)
 from flaskblog.users.utils import save_picture, send_reset_email, send_alert_email, send_mfa_email
-import pyotp
 
 
 users = Blueprint('users', __name__)
@@ -104,7 +101,7 @@ def login():
             db.session.commit()
             flash('Login Unsuccessful. Please check email and password', 'danger')
             users_logger.warning(f"Login Attempt {user.login_attempt} (Unuccessful): {user.username}")
-    return render_template('login.html', title='Login', form=form)
+    return render_template('users/login.html', title='Login', form=form)
 
 
 @users.route("/login/2fa/<token>", methods=['GET', 'POST'])
@@ -119,20 +116,20 @@ def mfa_token(token):
         return redirect(url_for('main.home'))
 
 
-@users.route("/login/2fa/<int:user_id>", methods=['GET', 'POST'])
-def login_2fa(user_id):
-    totp = pyotp.TOTP("base32secret3232", interval=60) #generates OTP
-    mfa_form = MfaForm()
-    if mfa_form.validate_on_submit():
-        if totp.verify(request.form.get('otp')):
-            login_user(user, remember=remember_me)
-            users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
-            user.login_attempt = 0
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('main.home'))
-        else:
-            print('wrong')
-    return render_template('login_2fa.html', otp=totp.now(), mfa_form=mfa_form)
+# @users.route("/login/2fa/<int:user_id>", methods=['GET', 'POST'])
+# def login_2fa(user_id):
+#     totp = pyotp.TOTP("base32secret3232", interval=60) #generates OTP
+#     mfa_form = MfaForm()
+#     if mfa_form.validate_on_submit():
+#         if totp.verify(request.form.get('otp')):
+#             login_user(user, remember=remember_me)
+#             users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
+#             user.login_attempt = 0
+#             next_page = request.args.get('next')
+#             return redirect(next_page) if next_page else redirect(url_for('main.home'))
+#         else:
+#             print('wrong')
+#     return render_template('login_2fa.html', otp=totp.now(), mfa_form=mfa_form)
 
 
 
