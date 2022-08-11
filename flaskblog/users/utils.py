@@ -28,3 +28,13 @@ def send_reset_email(user):
                 'If you did not make this request then simply ignore this email and no changes will be made.'
     mail.send(msg)
     return link
+
+def send_mfa_email(user):
+    token = user.get_mfa_token()
+    link = url_for('users.mfa_token', token=token, _external=True)
+    msg = Message('2FA Verification', sender='noreply@demo.com', recipients=[user.email])
+    msg.body =  'This token will expire in 60 Seconds\n'\
+                f'To verify, visit the following link: {link}\n'\
+                'If you did not make this request then simply ignore this email.'
+    mail.send(msg)
+    return link

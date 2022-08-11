@@ -30,7 +30,7 @@ class RegistrationForm(FlaskForm):
 
     def validate_password(self, password):
         
-        # errors = []
+        errors = []
         digit_error = re.search(r"\d", password.data) is None
         uppercase_error = re.search(r"[A-Z]", password.data) is None
         lowercase_error = re.search(r"[a-z]", password.data) is None
