@@ -4,6 +4,8 @@ from flask.json import jsonify
 from flask_login import current_user
 from flaskblog.models import Post
 from flaskblog.main.forms import PaymentForm
+import urllib
+import json
 
 main = Blueprint('main', __name__)
 
@@ -14,6 +16,15 @@ def home():
     page = request.args.get('page', 1, type=int)
     posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
     return render_template('main/home.html', posts=posts)
+
+
+@main.route("/random-image")
+def get_random_image():
+    client_id = "kJjZTgflsYErjn8JEXXsveGngmzHvXogJ_-qeU8MBVc" #TODO hide
+    url = f"https://api.unsplash.com/photos/random/?client_id={client_id}"
+    response = urllib.request.urlopen(url)
+    data = json.loads(response.read())
+    return '<img src="' + data['urls']['small'] + '">'
 
 
 @main.route("/about")
