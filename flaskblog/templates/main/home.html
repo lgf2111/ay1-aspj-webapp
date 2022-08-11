@@ -10,10 +10,22 @@
             </div>
             <h2><a class="article-title" href="{{ url_for('posts.post', post_id=post.id) }}">{{ post.title }}</a></h2>
             <p class="article-content">{{ post.content }}</p>
-            <form class="input-group md-3" method="POST" action="{{ url_for('posts.new_comment', post_id=post.id) }}">
-              <input type="text" id="text" name="text" class="form-control" placeholder="Comment Something"/>
-              <button type="submit" class="btn btn-primary">Comment</button>
-            </form>
+            <div class="">
+              <form class="input-group md-3" method="POST" action="{{ url_for('posts.new_comment', post_id=post.id) }}">
+                <input type="text" id="text" name="text" class="form-control" placeholder="Comment Something"/>
+                <button type="submit" class="btn btn-primary">Comment</button>
+              </form>
+              {% for comment in post.comments %}
+                <div class="d-flex">
+                  <a class="me-5" href="{{ url_for('users.user_posts', username=comment.user.username) }})">
+                    {{ comment.user.username }}
+                  </a>
+                  <p class="">
+                    {{ comment.text }}
+                  </p>
+                </div>
+              {% endfor %}
+            </div>
           </div>
         </article>
     {% endfor %}

@@ -71,13 +71,12 @@ def delete_post(post_id):
 @login_required
 def new_comment(post_id):
     text = request.form.get('text')
-
     if not text:
         flash('Comment cannot be empty', 'error')
     else:
         # post = Post.query.filter_by(id=post.id)
         if post:
-            comment = Comment(text=text, author=current_user.id, post_id=post_id)
+            comment = Comment(text=text, user_id=current_user.id, post_id=post_id)
             db.session.add(comment)
             db.session.commit()
         else: 
