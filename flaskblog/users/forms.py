@@ -74,6 +74,11 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 
+class MfaForm(FlaskForm):
+    otp = StringField('Enter OTP', validators=[DataRequired()])
+    submit = SubmitField('Verify')
+
+
 class UpdateAccountForm(FlaskForm):
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=2, max=20)])

@@ -6,9 +6,17 @@
         <div class="media-body">
           <h2 class="account-heading">{{ current_user.username }}</h2>
           <p class="text-secondary">{{ current_user.email }}</p>
-          <form method="" action="/two_fa">
-            <input type="submit" name="enable" id="enable" value="Enable 2FA" class="btn btn-outline-info">
+
+          {% if mfa_status == False %}
+          <form method="" action="/enable_two_fa">
+            <input type="submit" value="Enable 2FA" class="btn btn-outline-info">
           </form>
+
+          {% else %}
+          <form method="" action="/disable_two_fa">
+            <input type="submit" value="Disable 2FA" class="btn btn-outline-danger">
+          </form>
+          {% endif %}
         </div>
 
       </div>

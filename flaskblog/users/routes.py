@@ -1,12 +1,17 @@
+from multiprocessing import AuthenticationError
+from re import U
 from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_login import login_user, current_user, logout_user, login_required
 from flaskblog import db, bcrypt, limiter, users_logger
 from flaskblog.models import User, Post
-from flaskblog.users.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
-                                   RequestResetForm, ResetPasswordForm)
+from flaskblog.users.forms import (MfaForm, RegistrationForm, LoginForm, UpdateAccountForm,
+                                   RequestResetForm, ResetPasswordForm, MfaForm)
 from flaskblog.users.utils import save_picture, send_reset_email
+import pyotp
+
 
 users = Blueprint('users', __name__)
+
 
 
 @users.route("/register", methods=['GET', 'POST'])
@@ -24,7 +29,7 @@ def register():
         return redirect(url_for('users.login'))
     return render_template('register.html', title='Register', form=form)
 
-
+user_id = []
 @users.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -32,25 +37,84 @@ def login():
         return redirect(url_for('main.home'))
     form = LoginForm()
     if form.validate_on_submit():
+        global user #user was made global to log user in after 2FA
         user = User.query.filter_by(email=form.email.data).first()
         if user.login_attempt > 10:
             flash('Your account has been locked.', 'danger')
+
             if user.login_attempt <= 15:
                 users_logger.warning(f"Login Attempt {user.login_attempt} (Locked): {user.username}")
             else:
                 users_logger.error(f"Login Attempt {user.login_attempt} (Locked): {user.username}")
+
         elif user and bcrypt.check_password_hash(user.password, form.password.data):
-                login_user(user, remember=form.remember.data)
-                users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
-                user.login_attempt = 0
-                next_page = request.args.get('next')
-                return redirect(next_page) if next_page else redirect(url_for('main.home'))
+            global remember_me #made global for 2FA too
+            remember_me = form.remember.data
+            if user.mfa == True: #after users username and password is correct, check for 2fa status
+                return redirect(url_for('users.login_2fa')) #calls function OTP function
+
+            # remember_me = form.remember.data
+            # if user.mfa == True:
+            #     user = User.query.filter_by(email=form.email.data).first()
+            #     print('True1')
+            #     totp = pyotp.TOTP("base32secret3232", interval=60)
+            #     print('True2')
+            #     mfa_form = MfaForm()
+            #     print('True3')
+            #     if MfaForm().validate_on_submit():
+            #         print('True4')
+            #         if totp.verify(request.form.get('otp')):
+            #             login_user(user, remember=remember_me)
+            #             users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
+            #             user.login_attempt = 0
+            #             next_page = request.args.get('next')
+            #             return redirect(next_page) if next_page else redirect(url_for('main.home'))
+            #         else:
+            #             print('wrong')
+            #     return render_template('login_2fa.html', otp=totp.now(), mfa_form=mfa_form)
+
+            login_user(user, remember=form.remember.data)
+            users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
+            user.login_attempt = 0
+            next_page = request.args.get('next')
+    
+            return redirect(next_page) if next_page else redirect(url_for('main.home'))
         else:
             user.login_attempt += 1
             db.session.commit()
             flash('Login Unsuccessful. Please check email and password', 'danger')
             users_logger.warning(f"Login Attempt {user.login_attempt} (Unuccessful): {user.username}")
     return render_template('login.html', title='Login', form=form)
+
+
+@users.route("/login_2fa", methods=['GET', 'POST'])
+def login_2fa():
+    totp = pyotp.TOTP("base32secret3232", interval=60) #generates OTP
+    mfa_form = MfaForm()
+    if mfa_form.validate_on_submit():
+        if totp.verify(request.form.get('otp')):
+            login_user(user, remember=remember_me)
+            users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
+            user.login_attempt = 0
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('main.home'))
+        else:
+            print('wrong')
+    return render_template('login_2fa.html', otp=totp.now(), mfa_form=mfa_form)
+
+
+
+# @users.route("/login_2fa_form", methods=["GET","POST"])
+# def login_2fa_form():
+#     form = MfaForm()
+#     if form.validate_on_submit():
+#         if totp.verify(request.form.get('otp')):
+#             return redirect('main.home')
+#         else:
+#             return redirect(url_for('login_2fa'))
+#     return render_template('login_2fa.html', title='2FA', form=form)
+    
+
 
 
 @users.route("/logout")
@@ -80,7 +144,7 @@ def account():
         form.email.data = current_user.email
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account',
-                           image_file=image_file, form=form)
+                           image_file=image_file, form=form, mfa_status=current_user.mfa)
 
 
 @users.route("/user/<string:username>")
@@ -125,3 +189,18 @@ def reset_token(token):
         flash('Your password has been updated! You are now able to log in', 'success')
         return redirect(url_for('users.login'))
     return render_template('reset_token.html', title='Reset Password', form=form)
+
+
+@users.route("/enable_two_fa")
+def enable_two_fa():
+    current_user.mfa = True
+    db.session.commit()
+    flash("2 Factor Authentication has been activate for your current account's email address", 'success')
+    return redirect(url_for('users.account'))
+
+@users.route("/disable_two_fa")
+def disable_two_fa():
+    current_user.mfa = False
+    db.session.commit()
+    flash("2 Factor Authentication has been deactivated for your current account's email address", 'danger')
+    return redirect(url_for('users.account'))
