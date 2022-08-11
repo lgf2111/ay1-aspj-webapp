@@ -1,17 +1,31 @@
-from multiprocessing import AuthenticationError
-# from re import U
-from flask import render_template, url_for, flash, redirect, request, Blueprint
+from flask import render_template, url_for, flash, redirect, request, Blueprint, session
 from flask_login import login_user, current_user, logout_user, login_required
-from flaskblog import db, bcrypt, limiter, users_logger
+from flaskblog import db, bcrypt, users_logger
 from flaskblog.models import User, Post
 from flaskblog.users.forms import (MfaForm, RegistrationForm, LoginForm, UpdateAccountForm,
                                    RequestResetForm, ResetPasswordForm, MfaForm)
-from flaskblog.users.utils import save_picture, send_reset_email, send_mfa_email
-
+from flaskblog.users.utils import save_picture, send_reset_email, send_alert_email, send_mfa_email
 
 
 users = Blueprint('users', __name__)
 
+
+    
+    
+# @users.route("/admin_register", methods=['GET', 'POST'])
+# def admin_register():
+#     if current_user.is_authenticated:
+#         return redirect(url_for('main.home'))
+#     form = RegistrationForm()
+#     if form.validate_on_submit():
+#         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+#         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+#         db.session.add(user)
+#         db.session.commit()
+#         flash('Your account has been created! You are now able to log in', 'success')
+#         users_logger.info(f"User Registered: {user.username}")
+#         return redirect(url_for('users.login'))
+#     return render_template('admin_register.html', title='Register', form=form)
 
 
 @users.route("/register", methods=['GET', 'POST'])
@@ -24,10 +38,10 @@ def register():
         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
-        flash('Your account has been created! You are now able to log in', 'success')
+        flash('Your account has been created! You are now able to log in.', 'success')
         users_logger.info(f"User Registered: {user.username}")
         return redirect(url_for('users.login'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('users/register.html', title='Register', form=form)
 
 
 @users.route("/login", methods=['GET', 'POST'])
@@ -37,6 +51,7 @@ def login():
         return redirect(url_for('main.home'))
     form = LoginForm()
     if form.validate_on_submit():
+        output = lambda login_attempt, state, username: f"Login Attempt {login_attempt} ({state}): {username}"
         user = User.query.filter_by(email=form.email.data).first()
         if user.login_attempt > 10:
             flash('Your account has been locked.', 'danger')
@@ -64,7 +79,7 @@ def login():
             db.session.commit()
             flash('Login Unsuccessful. Please check email and password', 'danger')
             users_logger.warning(f"Login Attempt {user.login_attempt} (Unuccessful): {user.username}")
-    return render_template('login.html', title='Login', form=form)
+    return render_template('users/login.html', title='Login', form=form)
 
 
 @users.route("/login/2fa/<token>", methods=['GET', 'POST'])
@@ -77,6 +92,36 @@ def mfa_token(token):
         login_user(user)
         flash('Logged in successful.', 'success')
         return redirect(url_for('main.home'))
+
+
+@users.route("/login/2fa/<int:user_id>", methods=['GET', 'POST'])
+def login_2fa(user_id):
+    totp = pyotp.TOTP("base32secret3232", interval=60) #generates OTP
+    mfa_form = MfaForm()
+    if mfa_form.validate_on_submit():
+        if totp.verify(request.form.get('otp')):
+            login_user(user, remember=remember_me)
+            users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
+            user.login_attempt = 0
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('main.home'))
+        else:
+            print('wrong')
+    return render_template('login_2fa.html', otp=totp.now(), mfa_form=mfa_form)
+
+
+
+# @users.route("/login_2fa_form", methods=["GET","POST"])
+# def login_2fa_form():
+#     form = MfaForm()
+#     if form.validate_on_submit():
+#         if totp.verify(request.form.get('otp')):
+#             return redirect('main.home')
+#         else:
+#             return redirect(url_for('login_2fa'))
+#     return render_template('login_2fa.html', title='2FA', form=form)
+    
+
 
 
 @users.route("/logout")
@@ -105,8 +150,8 @@ def account():
         form.username.data = current_user.username
         form.email.data = current_user.email
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-    return render_template('account.html', title='Account',
-                           image_file=image_file, form=form, mfa_status=current_user.mfa)
+    return render_template('users/account.html', title='Account',
+                           image_file=image_file, form=form)
 
 
 @users.route("/user/<string:username>")
@@ -116,7 +161,7 @@ def user_posts(username):
     posts = Post.query.filter_by(author=user)\
         .order_by(Post.date_posted.desc())\
         .paginate(page=page, per_page=5)
-    return render_template('user_posts.html', posts=posts, user=user)
+    return render_template('posts/user_posts.html', posts=posts, user=user)
 
 
 @users.route("/reset_password", methods=['GET', 'POST'])
@@ -127,10 +172,10 @@ def reset_request():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         link = send_reset_email(user)
-        users_logger.info(f"Password Reset Request: {user.username}, {link}")
+        users_logger.info(f"Password Reset Request ({user.username}): {link}")
         flash('An email has been sent with instructions to reset your password.', 'info')
         return redirect(url_for('users.login'))
-    return render_template('reset_request.html', title='Reset Password', form=form)
+    return render_template('users/reset_request.html', title='Reset Password', form=form)
 
 
 @users.route("/reset_password/<token>", methods=['GET', 'POST'])
@@ -150,7 +195,7 @@ def reset_token(token):
         users_logger.info(f"Password Resetted: {user.username}")
         flash('Your password has been updated! You are now able to log in', 'success')
         return redirect(url_for('users.login'))
-    return render_template('reset_token.html', title='Reset Password', form=form)
+    return render_template('users/reset_token.html', title='Reset Password', form=form)
 
 
 @users.route("/enable_two_fa")
