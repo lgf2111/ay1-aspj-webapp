@@ -30,6 +30,8 @@
               <a class="nav-item nav-link" href="{{ url_for('main.about') }}">About</a>
               {% if current_user.role_id == 2 %}
               <a class="nav-item nav-link" href="{{ url_for('admin.index') }}">Admin</a>
+              {% else %}
+              <a class="nav-item nav-link" href="{{ url_for('main.plans') }}">Plans</a>
               {% endif %}
             </div>
             <!-- Navbar Right Side -->
