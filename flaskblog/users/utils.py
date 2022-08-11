@@ -1,6 +1,8 @@
 import os
 import secrets
+import threading
 from PIL import Image
+from datetime import datetime
 from flask import url_for, current_app
 from flask_mail import Message
 from flaskblog import mail
@@ -28,6 +30,12 @@ def send_reset_email(user):
                 'If you did not make this request then simply ignore this email and no changes will be made.'
     mail.send(msg)
     return link
+
+
+def send_alert_email(activity, user):
+    msg = Message('Suspicious Activity Detected', sender='noreply@demo.com', recipients=['213587x@gmail.com'])
+    msg.body = f"User {user.username} has tried to {activity} on {datetime.now()}.\n{url_for('admin.index', _external=True)}"
+    mail.send(msg)
 
 def send_mfa_email(user):
     token = user.get_mfa_token()
