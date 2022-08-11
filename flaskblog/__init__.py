@@ -13,6 +13,7 @@ from flask_limiter.util import get_remote_address
 
 from flaskblog.logger import setup_logger
 from flaskblog.config import Config
+from flask_paranoid import Paranoid
 
 
 db = SQLAlchemy()
@@ -20,6 +21,7 @@ bcrypt = Bcrypt()
 login_manager = LoginManager()
 login_manager.login_view = 'users.login'
 login_manager.login_message_category = 'info'
+login_manager.session_protection = "strong"
 admin = Admin(name='Flask Blog', template_mode='bootstrap4')
 mail = Mail()
 limiter = Limiter(key_func=get_remote_address)
@@ -31,6 +33,8 @@ posts_logger = setup_logger('posts', 'logs/posts.log')
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(Config)
+    paranoid = Paranoid(app)
+    paranoid.redirect_view = '/'
     sentry_sdk.init(
         dsn="https://bc8b621ab5b241bdba1939206c8a35dc@o1276780.ingest.sentry.io/6605916",
         integrations=[
