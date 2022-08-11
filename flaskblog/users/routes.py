@@ -6,6 +6,9 @@ from flaskblog.users.forms import (RegistrationForm, LoginForm, UpdateAccountFor
                                    RequestResetForm, ResetPasswordForm)
 from flaskblog.users.utils import save_picture, send_reset_email, send_alert_email
 
+from Crypto.Cipher import AES
+import os
+
 users = Blueprint('users', __name__)
 
 
@@ -33,8 +36,13 @@ def register():
         return redirect(url_for('main.home'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        hashed_password = bcrypt.generate_password_hash(form.password.data)
+        key = os.environ.get('SECRET_KEY')[16:].encode()
+        cipher = AES.new(key, AES.MODE_EAX)
+        nonce = cipher.nonce
+        encrypted_password, tag = cipher.encrypt_and_digest(hashed_password)
+        user = User(username=form.username.data, email=form.email.data, 
+                    encrypted_password=encrypted_password, nonce=nonce, tag=tag)
         db.session.add(user)
         db.session.commit()
         flash('Your account has been created! You are now able to log in.', 'success')
@@ -49,12 +57,19 @@ def login():
         return redirect(url_for('main.home'))
     form = LoginForm()
     if form.validate_on_submit():
+        key = os.environ.get('SECRET_KEY')[16:].encode()
         output = lambda login_attempt, state, username: f"Login Attempt {login_attempt} ({state}): {username}"
         user = User.query.filter_by(email=form.email.data).first()
+        cipher = AES.new(key, AES.MODE_EAX, nonce=user.nonce)
+        hashed_password = cipher.decrypt(user.encrypted_password)
+        try:
+            cipher.verify(user.tag)
+        except ValueError:
+            users_logger.critical(f"Password manipulated: {user.username}")
         if not user:
             flash('Login Unsuccessful. Please check email and password', 'danger')
             users_logger.warning(output(0, 'Does Not Exist', form.email.data))
-        elif user and bcrypt.check_password_hash(user.password, form.password.data) and user.login_attempt <= 10:
+        elif user and bcrypt.check_password_hash(hashed_password, form.password.data) and user.login_attempt <= 10:
             login_user(user, remember=form.remember.data)
             users_logger.info(output(user.login_attempt, 'Successful', user.username))
             user.login_attempt = 0
