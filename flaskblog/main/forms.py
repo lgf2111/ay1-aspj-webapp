@@ -15,7 +15,7 @@ class PaymentForm(FlaskForm):
             'Credit Card Number',
             [
                 DataRequired(),
-                Length(min=13, max=16, message="Invalid Credit Card Number")
+                Length(16, 16, message="Invalid Credit Card Number")
             ]
         )
     CardHolder = StringField(
@@ -39,11 +39,11 @@ class PaymentForm(FlaskForm):
                                                                         ('12', 'December')],
         )
 
-    ExpirationDateYY = SelectField('Year', [DataRequired(),], choices= [('22', '2022'),
-                                                                        ('23', '2023'),
-                                                                        ('24', '2024'),
-                                                                        ('25', '2025'),
-                                                                        ('26', '2026')],
+    ExpirationDateYY = SelectField('Year', [DataRequired(),], choices= [('2022', '2022'),
+                                                                        ('2023', '2023'),
+                                                                        ('2024', '2024'),
+                                                                        ('2025', '2025'),
+                                                                        ('2026', '2026')],
         )
 
 

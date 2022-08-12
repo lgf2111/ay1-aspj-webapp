@@ -157,7 +157,13 @@ def reset_token(token):
     form = ResetPasswordForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user.password = hashed_password
+        key = os.environ.get('SECRET_KEY')[16:].encode()
+        cipher = AES.new(key, AES.MODE_EAX)
+        nonce = cipher.nonce
+        encrypted_password, tag = cipher.encrypt_and_digest(hashed_password)
+        user.encrypted_password = encrypted_password
+        user.nonce = nonce
+        user.tag = tag
         user.login_attempt = 0
         db.session.commit()
         users_logger.info(f"Password Resetted: {user.username}")

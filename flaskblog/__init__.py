@@ -10,6 +10,9 @@ from flask_admin.contrib import sqla
 from flask_mail import Mail
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+import stripe
+import os
+import dotenv
 
 from flaskblog.logger import setup_logger
 from flaskblog.config import Config
@@ -24,9 +27,18 @@ login_manager.session_protection = "strong"
 admin = Admin(name='Flask Blog', template_mode='bootstrap4')
 mail = Mail()
 limiter = Limiter(key_func=get_remote_address)
+dotenv.load_dotenv()
+stripe_keys = {
+    'secret_key': os.environ['STRIPE_SECRET_KEY'],
+    'publishable_key': os.environ['STRIPE_PUBLISHABLE_KEY']
+}
+stripe.api_key = stripe_keys['secret_key']
+
 root_logger = setup_logger('', 'logs/root.log')
 users_logger = setup_logger('users', 'logs/users.log')
 posts_logger = setup_logger('posts', 'logs/posts.log')
+
+
 
 
 def create_app(config_class=Config):

@@ -1,108 +1,19 @@
 {% extends 'layout.html' %}
 {% block content %}
 <div class="content-section">
-    <form method="POST" action="">
-        {{ form.hidden_tag() }}
-        <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Payment</legend>
-            <div class="form-group">
-                {{ form.CreditCardNumber.label(class="form-control-label") }}
-
-                {% if form.CreditCardNumber.errors %}
-                    {{ form.CreditCardNumber(class="form-control form-control-lg is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.CreditCardNumber.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    {{ form.CreditCardNumber(class="form-control form-control-lg", placeholder="4539554344592280") }}
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.CardHolder.label(class="form-control-label") }}
-                {% if form.CardHolder.errors %}
-                    {{ form.CardHolder(class="form-control form-control-lg is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.CardHolder.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    {{ form.CardHolder(class="form-control form-control-lg", placeholder="Donald C. Lee") }}
-                {% endif %}
-            </div>
-            <div class="d-flex">
-                <div class="form-group">
-                    {{ form.ExpirationDateMM.label(class="form-control-label") }}
-                    {% if form.ExpirationDateMM.errors %}
-                        {{ form.ExpirationDateMM(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.ExpirationDateMM.errors %}
-                                <span>{{ error }}</span> 
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.ExpirationDateMM(class="form-control form-control-lg", placeholder="02/2026") }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.ExpirationDateYY.label(class="form-control-label") }}
-                    {% if form.ExpirationDateYY.errors %}
-                        {{ form.ExpirationDateYY(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.ExpirationDateYY.errors %}
-                                <span>{{ error }}</span> 
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.ExpirationDateYY(class="form-control form-control-lg", placeholder="02/2026") }}
-                    {% endif %}
-                </div>
-            </div>
-            <div class="form-group">
-                {{ form.SecurityCode.label(class="form-control-label") }}
-                {% if form.SecurityCode.errors %}
-                    {{ form.SecurityCode(class="form-control form-control-lg is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.SecurityCode.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    {{ form.SecurityCode(class="form-control form-control-lg", placeholder="845") }}
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.Amount.label(class="form-control-label") }}
-                {% if form.Amount.errors %}
-                    {{ form.Amount(class="form-control form-control-lg is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.Amount.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    {{ form.Amount(class="form-control form-control-lg", placeholder="100.00") }}
-                {% endif %}
-                <style>
-                    /* Chrome, Safari, Edge, Opera */
-                    input::-webkit-outer-spin-button,
-                    input::-webkit-inner-spin-button {
-                    -webkit-appearance: none;
-                    margin: 0;
-                    }
-
-                    /* Firefox */
-                    input[type=number] {
-                    -moz-appearance: textfield;
-                    }
-                </style>
-            </div>
-        </fieldset>
-        <div class="form-group">
-            {{ form.submit(class="btn btn-outline-info") }}
-        </div>
+    <form action="/charge" method="post">
+        <article>
+          <label>
+            <span>Amount is $20.00</span>
+          </label>
+        </article>
+      
+        <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                data-key="{{ key }}"
+                data-description="Premium Plan Purchase"
+                data-amount="2000"
+                data-currency="sgd"
+                data-locale="auto"></script>
     </form>
 </div>
 {% endblock content %}

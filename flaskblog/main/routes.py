@@ -2,10 +2,12 @@ from crypt import methods
 from flask import render_template, request, Blueprint, redirect, url_for, flash
 from flask.json import jsonify
 from flask_login import current_user
+from flaskblog import stripe_keys
 from flaskblog.models import Post
 from flaskblog.main.forms import PaymentForm
 import urllib
 import json
+import stripe
 
 main = Blueprint('main', __name__)
 
@@ -40,20 +42,28 @@ def plans():
 @main.route("/plans/get-premium", methods=["GET","POST"])
 def get_premium():
     if not current_user.is_authenticated:
-        flash("Please login or register first.", "danger")
+        flash("Please login or register first.", "info")
         return redirect(url_for('users.login'))
-    form = PaymentForm()
-    if form.validate_on_submit():
-        credit_card = {
-        'CreditCardNumber': form.CreditCardNumber.data,
-        'CardHolder': form.CardHolder.data,
-        'ExpirationDateMM': form.ExpirationDateMM.data,
-        'ExpirationDateYY': form.ExpirationDateYY.data,
-        'SecurityCode': form.SecurityCode.data,
-        'Amount': form.Amount.data,
-        }
-        return jsonify(credit_card)
-    return render_template('main/get-premium.html', title='Get Premium', form=form)
+    return render_template('main/get-premium.html', title='Get Premium', key=stripe_keys['publishable_key'])
+
+
+@main.route("/charge", methods=["POST"])
+def charge_premium():
+    if not current_user.is_authenticated:
+        flash("Please login or register first.", "info")
+        return redirect(url_for('users.login'))
+    amount = 2000
+    customer = stripe.Customer.create(
+        email=current_user.email,
+        source=request.form['stripeToken']
+    )
+    charge = stripe.Charge.create(
+        customer=customer.id,
+        amount=amount,
+        currency='sgd',
+        description='Premium Plan Purchase'
+    )
+    return render_template('main/charge.html', title='Payment Success', amount=amount)
 
 
 # Test Sentry
