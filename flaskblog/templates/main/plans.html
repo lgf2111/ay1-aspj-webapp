@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Plans</h1>
+    <div class="d-flex">
+        <article class="media content-section col-6">
+            <div class="media-body">
+              <h2><a class="article-title" href="">Basic Plan</a></h2><hr>
+            <ul>
+                <li>$0/month</li>
+            </ul><hr>
+            <a href="" class="btn btn-secondary col-12">It's Free!</a>
+        </div>
+    </article>
+    <article class="media content-section col-6">
+        <div class="media-body">
+            <h2><a class="article-title" href="">Premium Plan</a></h2><hr>
+            <ul>
+                <li>$20/month</li>
+            </ul><hr>
+            <a href="{{url_for('main.get_premium')}}" class="btn btn-primary col-12">Upgrade Now!</a>
+            </div>
+        </article>
+    </div>
+
+{% endblock content %}
