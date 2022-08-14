@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="content-section">
+    <form action="/charge" method="post">
+        <article>
+          <label>
+            <span>Amount is $20.00</span>
+          </label>
+        </article>
+      
+        <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                data-key="{{ key }}"
+                data-description="Premium Plan Purchase"
+                data-amount="2000"
+                data-currency="sgd"
+                data-locale="auto"></script>
+    </form>
+</div>
+{% endblock content %}
