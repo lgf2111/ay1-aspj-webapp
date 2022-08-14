@@ -7,7 +7,7 @@ from flask_login import current_user
 from flaskblog.models import User
 import re 
 
-
+password_errors = []
 class RegistrationForm(FlaskForm):
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=2, max=20)])
@@ -29,40 +29,22 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('That email is taken. Please choose a different one.')
 
     def validate_password(self, password):
-        
-        errors = []
         digit_error = re.search(r"\d", password.data) is None
         uppercase_error = re.search(r"[A-Z]", password.data) is None
         lowercase_error = re.search(r"[a-z]", password.data) is None
-        symbol_error = re.search(r"[!@#$%^&*]", password.data) is None
+        symbol_error = re.search(r"[~!@#$%^&*()_+]", password.data) is None
+
+        if digit_error:
+            password_errors.append("At least 1 digit")
+        if uppercase_error:
+            password_errors.append('At least 1 uppercase')
+        if lowercase_error:
+            password_errors.append('At least 1 lowercase')
+        if symbol_error:
+            password_errors.append('At least 1 special character of the following ~!@#$%^&*()_+')
 
         if digit_error or uppercase_error or lowercase_error or symbol_error:
-            raise ValidationError('Your password should contain at least 1 digit, uppercase, lowercase and special characters of the following !@#$%^&*')
-    # def uppercase_error(self, password):
-    #     # errors = []
-    #     uppercase_error = re.search(r"[A-Z]", password.data) is None
-    #     lowercase_error = re.search(r"[a-z]", password.data) is None
-    #     symbol_error = re.search(r"[!@#$%^&*]", password.data) is None
-
-    #     if uppercase_error:
-    #         raise ValidationError('At least 1 uppercase')
-
-        # for error in [digit_error , uppercase_error, lowercase_error, symbol_error]:
-        #     if error:
-        #         errors.append(error)
-        # if errors:
-        #     raise ValidationError(errors)
-        
-        # if digit_error:
-        #     errors.append('1 Digit')
-        # if uppercase_error:
-        #     errors.append('1 Uppercase')
-        # if lowercase_error:
-        #     errors.append('1 Lowercase')
-        # if symbol_error:
-        #     errors.append('1 Special Character')
-        # for error in errors:
-        #     raise ValidationError(error)
+            raise ValidationError('Weak Password')
         
 
 
@@ -112,7 +94,26 @@ class RequestResetForm(FlaskForm):
 
 
 class ResetPasswordForm(FlaskForm):
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=12)])
     confirm_password = PasswordField('Confirm Password',
                                      validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Reset Password')
+
+
+    def validate_password(self, password):
+        digit_error = re.search(r"\d", password.data) is None
+        uppercase_error = re.search(r"[A-Z]", password.data) is None
+        lowercase_error = re.search(r"[a-z]", password.data) is None
+        symbol_error = re.search(r"[~!@#$%^&*()_+]", password.data) is None
+
+        if digit_error:
+            password_errors.append("At least 1 digit")
+        if uppercase_error:
+            password_errors.append('At least 1 uppercase')
+        if lowercase_error:
+            password_errors.append('At least 1 lowercase')
+        if symbol_error:
+            password_errors.append('At least 1 special character of the following ~!@#$%^&*()_+')
+
+        if digit_error or uppercase_error or lowercase_error or symbol_error:
+            raise ValidationError('Weak Password')

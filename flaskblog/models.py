@@ -7,10 +7,10 @@ from flask_login import UserMixin
 
 
 
-
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
 
 
 class User(db.Model, UserMixin):
@@ -24,6 +24,8 @@ class User(db.Model, UserMixin):
     posts = db.relationship('Post', backref='author', lazy=True)
     mfa = db.Column(db.Boolean, default=False, nullable=False)
     comments = db.relationship('Comment', backref='user', lazy=True)
+
+
 
 
     def get_reset_token(self, expires_sec=1800):

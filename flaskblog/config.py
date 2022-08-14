@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import os
 
 
@@ -14,3 +15,4 @@ class Config:
     REMEMBER_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SECURE = True
     REMEMBER_COOKIE_SECURE = True
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)

@@ -1,10 +1,14 @@
+from time import time
 from flask import render_template, url_for, flash, redirect, request, Blueprint, session
 from flask_login import login_user, current_user, logout_user, login_required
-from flaskblog import db, bcrypt, users_logger
+from flaskblog import db, bcrypt, errors, users_logger
 from flaskblog.models import User, Post
 from flaskblog.users.forms import (MfaForm, RegistrationForm, LoginForm, UpdateAccountForm,
-                                   RequestResetForm, ResetPasswordForm, MfaForm)
+                                   RequestResetForm, ResetPasswordForm, MfaForm, password_errors)
 from flaskblog.users.utils import save_picture, send_reset_email, send_alert_email, send_mfa_email
+import datetime
+from datetime import timedelta
+
 
 
 users = Blueprint('users', __name__)
@@ -27,12 +31,12 @@ users = Blueprint('users', __name__)
 #         return redirect(url_for('users.login'))
 #     return render_template('admin_register.html', title='Register', form=form)
 
-
 @users.route("/register", methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.home'))
     form = RegistrationForm()
+    session.pop('_flashes', None)
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
@@ -41,6 +45,12 @@ def register():
         flash('Your account has been created! You are now able to log in.', 'success')
         users_logger.info(f"User Registered: {user.username}")
         return redirect(url_for('users.login'))
+
+
+    for error in password_errors:
+        flash(error, 'danger')
+    password_errors.clear()
+        
     return render_template('users/register.html', title='Register', form=form)
 
 
@@ -69,6 +79,7 @@ def login():
                 return redirect(url_for('users.login')) #calls function OTP function
 
             login_user(user, remember=form.remember.data)
+
             users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
             user.login_attempt = 0
             next_page = request.args.get('next')
@@ -94,40 +105,13 @@ def mfa_token(token):
         return redirect(url_for('main.home'))
 
 
-@users.route("/login/2fa/<int:user_id>", methods=['GET', 'POST'])
-def login_2fa(user_id):
-    totp = pyotp.TOTP("base32secret3232", interval=60) #generates OTP
-    mfa_form = MfaForm()
-    if mfa_form.validate_on_submit():
-        if totp.verify(request.form.get('otp')):
-            login_user(user, remember=remember_me)
-            users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
-            user.login_attempt = 0
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('main.home'))
-        else:
-            print('wrong')
-    return render_template('login_2fa.html', otp=totp.now(), mfa_form=mfa_form)
-
-
-
-# @users.route("/login_2fa_form", methods=["GET","POST"])
-# def login_2fa_form():
-#     form = MfaForm()
-#     if form.validate_on_submit():
-#         if totp.verify(request.form.get('otp')):
-#             return redirect('main.home')
-#         else:
-#             return redirect(url_for('login_2fa'))
-#     return render_template('login_2fa.html', title='2FA', form=form)
     
-
-
 
 @users.route("/logout")
 def logout():
     username = current_user.username
     logout_user()
+    
     users_logger.info(f"User Logged Out: {username}")
     return redirect(url_for('main.home'))
 
@@ -187,6 +171,9 @@ def reset_token(token):
         flash('That is an invalid or expired token', 'warning')
         return redirect(url_for('users.reset_request'))
     form = ResetPasswordForm()
+
+    session.pop('_flashes', None)
+    
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user.password = hashed_password
@@ -195,6 +182,11 @@ def reset_token(token):
         users_logger.info(f"Password Resetted: {user.username}")
         flash('Your password has been updated! You are now able to log in', 'success')
         return redirect(url_for('users.login'))
+
+    for error in password_errors:
+        flash(error, 'danger')
+    password_errors.clear()
+
     return render_template('users/reset_token.html', title='Reset Password', form=form)
 
 
