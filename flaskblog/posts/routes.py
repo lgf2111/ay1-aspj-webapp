@@ -9,10 +9,10 @@ from flask_csp.csp import csp_header
 
 posts = Blueprint('posts', __name__)
 
-@posts.after_request
-def add_security_headers(resp):
-    resp.headers['Content-Security-Policy']="script-src 'self'"
-    return resp
+# @posts.after_request
+# def add_security_headers(resp):
+#     resp.headers['Content-Security-Policy']="script-src 'self'"
+#     return resp
 
 
 @posts.route("/post/new", methods=['GET', 'POST'])
@@ -76,7 +76,7 @@ def delete_post(post_id):
 
 @posts.route('/post/<int:post_id>/comment/new', methods=['GET', 'POST'])
 @login_required
-@csp_header({'script-src':"'none'"})
+# @csp_header({'script-src':"'self'"})
 def new_comment(post_id):
     text = request.form.get('text')
     if not text:

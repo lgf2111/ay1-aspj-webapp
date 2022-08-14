@@ -12,7 +12,7 @@ def add_security_headers(resp):
 
 @main.route("/")
 @main.route("/home")
-@csp_header({'script-src':"'none'"})
+@csp_header({'script-src':"'self'"})
 def home():
     page = request.args.get('page', 1, type=int)
     posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
