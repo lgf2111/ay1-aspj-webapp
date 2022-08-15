@@ -17,6 +17,10 @@
                     {% else %}
                         {{ form.password(class="form-control form-control-lg") }}
                     {% endif %}
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="customCheck1" onclick="showPassword()">
+                        <label class="custom-control-label" for="customCheck1">Show Password</label>
+                    </div>
                 </div>
                 <div class="form-group">
                     {{ form.confirm_password.label(class="form-control-label") }}

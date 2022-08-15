@@ -36,3 +36,13 @@ def send_alert_email(activity, user):
     msg = Message('Suspicious Activity Detected', sender='noreply@demo.com', recipients=['213587x@gmail.com'])
     msg.body = f"User {user.username} has tried to {activity} on {datetime.now()}.\n{url_for('admin.index', _external=True)}"
     mail.send(msg)
+
+def send_mfa_email(user):
+    token = user.get_mfa_token()
+    link = url_for('users.mfa_token', token=token, _external=True)
+    msg = Message('2FA Verification', sender='noreply@demo.com', recipients=[user.email])
+    msg.body =  'This token will expire in 60 Seconds\n'\
+                f'To verify, visit the following link: {link}\n'\
+                'If you did not make this request then simply ignore this email.'
+    mail.send(msg)
+    return link

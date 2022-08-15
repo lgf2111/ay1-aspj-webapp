@@ -7,10 +7,10 @@ from flask_login import UserMixin
 
 
 
-
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
 
 
 class User(db.Model, UserMixin):
@@ -24,11 +24,18 @@ class User(db.Model, UserMixin):
     tag = db.Column(db.Text, nullable=False)
     login_attempt = db.Column(db.Integer, nullable=False, default=0)
     posts = db.relationship('Post', backref='author', lazy=True)
+    mfa = db.Column(db.Boolean, default=False, nullable=False)
     comments = db.relationship('Comment', backref='user', lazy=True)
+
+
 
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
+        return s.dumps({'user_id': self.id}).decode('utf-8')
+
+    def get_mfa_token(self, expire_sec=60):
+        s = Serializer(current_app.config['SECRET_KEY'], expire_sec)
         return s.dumps({'user_id': self.id}).decode('utf-8')
 
     @staticmethod
@@ -39,7 +46,16 @@ class User(db.Model, UserMixin):
         except:
             return None
         return User.query.get(user_id)
-    
+
+    @staticmethod
+    def verify_mfa_token(token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+        return User.query.get(user_id)
+
 
     def __repr__(self):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"
@@ -66,7 +82,7 @@ class Comment(db.Model):
     
     
 
-    
+
 
 
 class Role(db.Model):

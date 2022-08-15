@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>{{otp}}</h1>
+<form method="POST" action="">
+    {{mfa_form.csrf_token}}
+    {{mfa_form.otp.label}}
+    {{mfa_form.otp}}
+    {{mfa_form.submit}}
+</form>
+
+{% endblock content %}

@@ -18,6 +18,7 @@ def add_security_headers(resp):
     return resp
 
 
+
 @main.route("/")
 @main.route("/home")
 @csp_header({'script-src':"'self'"})
