@@ -8,7 +8,8 @@ from flaskblog.users.forms import (MfaForm, RegistrationForm, LoginForm, UpdateA
 from flaskblog.users.utils import save_picture, send_reset_email, send_alert_email, send_mfa_email
 import datetime
 from datetime import date, timedelta
-
+import os
+from Crypto.Cipher import AES
 
 
 users = Blueprint('users', __name__)
@@ -63,7 +64,7 @@ def register():
 @users.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        flash("You're already logged in!")
+        flash("You're already logged in!", "info")
         return redirect(url_for('main.home'))
     form = LoginForm()
     if form.validate_on_submit():

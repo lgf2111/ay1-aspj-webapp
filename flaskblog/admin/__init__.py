@@ -12,14 +12,14 @@ class HomeAdminView(AdminIndexView):
     
     def inaccessible_callback(self, name, **kwargs):
         flash("You don't have permission to access this page.", "info")
-        return redirect(url_for('users.login', next=request.url))
+        return redirect(url_for('main.home'))
 
 class AdminMixin:
     def is_accessible(self):
         return current_user.role_id == 2
     
     def inaccessible_callback(self, name, **kwargs):
-        return redirect(url_for('users.login', next=request.url))
+        return redirect(url_for('main.home'))
 
 class AdminView(AdminMixin, ModelView):
     create_template = 'admin/create.html'
