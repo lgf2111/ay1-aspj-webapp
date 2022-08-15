@@ -15,23 +15,6 @@ from Crypto.Cipher import AES
 users = Blueprint('users', __name__)
 
 
-    
-    
-# @users.route("/admin_register", methods=['GET', 'POST'])
-# def admin_register():
-#     if current_user.is_authenticated:
-#         return redirect(url_for('main.home'))
-#     form = RegistrationForm()
-#     if form.validate_on_submit():
-#         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-#         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
-#         db.session.add(user)
-#         db.session.commit()
-#         flash('Your account has been created! You are now able to log in', 'success')
-#         users_logger.info(f"User Registered: {user.username}")
-#         return redirect(url_for('users.login'))
-#     return render_template('admin_register.html', title='Register', form=form)
-
 @users.route("/register", methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -87,14 +70,15 @@ def login():
             cipher.verify(user.tag)
         except ValueError:
             users_logger.critical(f"Password manipulated: {user.username}")
-        if user.login_attempt >= 5:
-            flash('Your account has been locked.', 'danger')
-            if user.login_attempt <= 15:
-                users_logger.warning(f"Login Attempt {user.login_attempt} (Locked): {user.username}")
-            else:
-                users_logger.error(f"Login Attempt {user.login_attempt} (Locked): {user.username}")
 
-        elif user and bcrypt.check_password_hash(hashed_password, form.password.data):
+        # if user.login_attempt >= 5:
+        #     flash('Your account has been locked.', 'danger')
+        #     if user.login_attempt <= 15:
+        #         users_logger.warning(f"Login Attempt {user.login_attempt} (Locked): {user.username}")
+        #     else:
+        #         users_logger.error(f"Login Attempt {user.login_attempt} (Locked): {user.username}")
+
+        if user and bcrypt.check_password_hash(hashed_password, form.password.data):
             if user.mfa == True: #after users username and password is correct, check for 2fa status
                 link = send_mfa_email(user)
                 users_logger.info(f"2FA Request: {user.username}, {link}")
@@ -117,15 +101,12 @@ def login():
         else:
             user.login_attempt += 1
             db.session.commit()
-            if user.login_attempt > 10:
+            if user.login_attempt > 5:
+                if user.login_attempt in range(6, 57, 10):
+                    send_alert_email(f'attempt to login for more than {user.login_attempt-1} times', user)
+                    users_logger.info(f"Alert email sent: {user.username}")
                 flash('Your account has been locked.', 'danger')
-                if user.login_attempt <= 15:
-                    users_logger.warning(output(user.login_attempt, 'Locked', user.username))
-                else:
-                    users_logger.error(output(user.login_attempt, 'Locked', user.username))
-                    if user.login_attempt in range(15,51,5):
-                        send_alert_email(f'attempt to login for more than {user.login_attempt} times', user)
-                        users_logger.info(f"Alert email sent: {user.username}")
+                users_logger.warning(output(user.login_attempt, 'Locked', user.username))
             else:
                 flash('Login Unsuccessful. Please check email and password', 'danger')
                 users_logger.warning(output(user.login_attempt, 'Unsuccessful', user.username))
@@ -140,6 +121,7 @@ def mfa_token(token):
         return redirect(url_for('users.login'))
     else:
         login_user(user)
+        session['dashboard_logged_in'] = True
         current_time = datetime.datetime.now()
         user.logout_time = current_time + timedelta(hours=1)
         user.login_attempt = 0

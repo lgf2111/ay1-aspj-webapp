@@ -28,15 +28,6 @@ def home():
     return render_template('main/home.html', posts=posts)
 
 
-# @main.route("/random-image")
-# def get_random_image():
-#     client_id = "kJjZTgflsYErjn8JEXXsveGngmzHvXogJ_-qeU8MBVc" #TODO hide
-#     url = f"https://api.unsplash.com/photos/random/?client_id={client_id}"
-#     response = urllib.request.urlopen(url)
-#     data = json.loads(response.read())
-#     return '<img src="' + data['urls']['small'] + '">'
-
-
 @main.route("/about")
 def about():
     return render_template('main/about.html', title='About')
@@ -55,7 +46,6 @@ def get_premium():
     if current_user.is_premium == True:
         flash("You have already purchased premium plan!")
         return redirect(url_for('mian.home'))
-    print(stripe_keys['publishable_key'])
     return render_template('main/get-premium.html', title='Get Premium', key=stripe_keys['publishable_key'])
 
 
@@ -86,18 +76,5 @@ def charge_premium():
     users_logger.info(f"Purchased premium plan: {current_user.username}")
     current_user.is_premium = True
     db.session.commit()
-    print(current_user.is_premium)
     flash('Thank you, you paid $20.00! Enjoy Premium!', 'success')
     return redirect(url_for('main.home'))
-
-
-# @main.route("/show-logs")
-# def show_logs():
-#     with open('logs/api.log') as f:
-#         output = f.readlines()
-#         return "<br><br>".join(output)
-
-# Test Sentry
-# @main.route('/debug-sentry')
-# def trigger_error():
-#     division_by_zero = 1 / 0

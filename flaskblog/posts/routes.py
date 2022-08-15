@@ -94,11 +94,8 @@ def new_comment(post_id):
     if not text:
         flash('Comment cannot be empty', 'error')
     else:
-        # post = Post.query.filter_by(id=post.id)
         if post:
-            CLEANR = re.compile('<.*?>') 
-            clean_text = re.sub(CLEANR, '', text)
-            comment = Comment(text=clean_text, user_id=current_user.id, post_id=post_id)
+            comment = Comment(text=text, user_id=current_user.id, post_id=post_id)
             db.session.add(comment)
             db.session.commit()
         else: 

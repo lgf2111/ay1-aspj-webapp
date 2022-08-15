@@ -16,13 +16,11 @@
                 <button type="submit" class="btn btn-primary">Comment</button>
               </form>
               {% for comment in post.comments %}
-                <div class="d-flex">
-                  <a class="me-5" href="{{ url_for('users.user_posts', username=comment.user.username) }}">
-                    {{ comment.user.username }}
-                  </a>
-                  <p class="">
-                    {{ comment.text | safe}}
-                  </p>
+                <div class="card">
+                  <div class="card-body">
+                    <a class="card-title" href="{{ url_for('users.user_posts', username=comment.user.username) }}">{{ comment.user.username }}</a>
+                    <p class="card-text">{{ comment.text }}</p>
+                  </div>
                 </div>
               {% endfor %}
             </div>
