@@ -36,6 +36,10 @@ def send_alert_email(activity, user):
     msg = Message('Suspicious Activity Detected', sender='noreply@demo.com', recipients=['213587x@gmail.com'])
     msg.body = f"User {user.username} has tried to {activity} on {datetime.now()}.\n{url_for('admin.index', _external=True)}"
     mail.send(msg)
+    
+    msg = Message('Suspicious Activity Detected', sender='noreply@demo.com', recipients=[user.email])
+    msg.body = f"Someone has tried to {activity}, if this isn't you, please change your password.\n{url_for('users.reset_request', _external=True)}"
+    mail.send(msg)
 
 def send_mfa_email(user):
     token = user.get_mfa_token()

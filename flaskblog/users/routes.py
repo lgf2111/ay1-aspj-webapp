@@ -71,6 +71,12 @@ def login():
         key = os.environ.get('SECRET_KEY')[16:].encode()
         output = lambda login_attempt, state, username: f"Login Attempt {login_attempt} ({state}): {username}"
         user = User.query.filter_by(email=form.email.data).first()
+        if isinstance(user.encrypted_password, str):
+            user.encrypted_password = eval(user.encrypted_password)
+        if isinstance(user.nonce, str):
+            user.nonce = eval(user.nonce)
+        if isinstance(user.tag, str):
+            user.tag = eval(user.tag)
         cipher = AES.new(key, AES.MODE_EAX, nonce=user.nonce)
         hashed_password = cipher.decrypt(user.encrypted_password)
         try:
@@ -94,6 +100,7 @@ def login():
 
             
 
+            session['dashboard_logged_in'] = True
             login_user(user, remember=form.remember.data)
             
             current_time = datetime.datetime.now()
@@ -115,6 +122,7 @@ def login():
                     users_logger.error(output(user.login_attempt, 'Locked', user.username))
                     if user.login_attempt in range(15,51,5):
                         send_alert_email(f'attempt to login for more than {user.login_attempt} times', user)
+                        users_logger.info(f"Alert email sent: {user.username}")
             else:
                 flash('Login Unsuccessful. Please check email and password', 'danger')
                 users_logger.warning(output(user.login_attempt, 'Unsuccessful', user.username))
@@ -141,6 +149,9 @@ def mfa_token(token):
 
 @users.route("/logout")
 def logout():
+    if not current_user.is_authenticated:
+        flash('You are not logged in yet.', 'danger')
+        return redirect(url_for('users.login'))
     username = current_user.username
     current_user.logout_time = None
     db.session.commit()

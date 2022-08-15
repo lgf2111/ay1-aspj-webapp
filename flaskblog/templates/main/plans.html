@@ -4,20 +4,26 @@
     <div class="d-flex">
         <article class="media content-section col-6">
             <div class="media-body">
-              <h2><a class="article-title" href="">Basic Plan</a></h2><hr>
+              <h2 class="article-title">Basic Plan</h2><hr>
             <ul>
-                <li>$0/month</li>
+                <li>Limited to only 1 post/day</li>
+                <li>Free</li>
             </ul><hr>
-            <a href="" class="btn btn-secondary col-12">It's Free!</a>
+            <a href="" class="btn btn-secondary col-12 disabled">It's Free!</a>
         </div>
     </article>
     <article class="media content-section col-6">
         <div class="media-body">
-            <h2><a class="article-title" href="">Premium Plan</a></h2><hr>
+            <h2 class="article-title">Premium Plan</h2><hr>
             <ul>
-                <li>$20/month</li>
+                <li>Unlimited posts/day</li>
+                <li>$20 one time payment</li>
             </ul><hr>
+            {% if current_user.is_premium%}
+            <a href="{{url_for('main.get_premium')}}" class="btn btn-primary col-12 disabled">You are already premium!</a>
+            {% else %}
             <a href="{{url_for('main.get_premium')}}" class="btn btn-primary col-12">Upgrade Now!</a>
+            {% endif %}
             </div>
         </article>
     </div>
