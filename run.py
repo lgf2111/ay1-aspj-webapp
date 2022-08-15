@@ -1,4 +1,3 @@
-from wsgiref.handlers import format_date_time
 from flaskblog import create_app, db
 from flask import session, g
 import datetime
@@ -24,7 +23,7 @@ def before_request():
         
 
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(seconds=30)
+    app.permanent_session_lifetime = timedelta(minutes=5)
     session.modified = True
     g.user = current_user
     

@@ -110,6 +110,7 @@ def mfa_token(token):
         login_user(user)
         current_time = datetime.datetime.now()
         user.logout_time = current_time + timedelta(hours=1)
+        user.login_attempt = 0
         db.session.commit()
 
         flash('Logged in successful.', 'success')
