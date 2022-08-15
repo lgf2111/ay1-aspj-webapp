@@ -14,7 +14,7 @@ main = Blueprint('main', __name__)
 
 @main.after_request
 def add_security_headers(resp):
-    resp.headers['Content-Security-Policy']="script-src 'self'"
+    resp.headers['Content-Security-Policy']="script-src 'self'; script-src-elem https://checkout.stripe.com/checkout.js"
     return resp
 
 
@@ -55,6 +55,7 @@ def get_premium():
     if current_user.is_premium == True:
         flash("You have already purchased premium plan!")
         return redirect(url_for('mian.home'))
+    print(stripe_keys['publishable_key'])
     return render_template('main/get-premium.html', title='Get Premium', key=stripe_keys['publishable_key'])
 
 
