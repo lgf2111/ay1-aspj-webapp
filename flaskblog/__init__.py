@@ -74,10 +74,12 @@ def create_app(config_class=Config):
 
 
     from flaskblog.admin import admin, AdminView
-    from flaskblog.models import User, Post
+    from flaskblog.models import User, Post, Comment, Role
     admin.init_app(app)
     admin.add_view(AdminView(User, db.session))
     admin.add_view(AdminView(Post, db.session))
+    admin.add_view(AdminView(Comment, db.session))
+    admin.add_view(AdminView(Role, db.session))
 
 
     from flaskblog.users.routes import users
