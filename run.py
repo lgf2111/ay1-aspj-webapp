@@ -1,5 +1,5 @@
 from flaskblog import create_app, db
-from flask import session, g
+from flask import session, g, flash
 import datetime
 from datetime import timedelta, datetime
 from flask_login import current_user, logout_user
@@ -11,6 +11,7 @@ def before_request():
     if current_user.is_active:
         if current_user.logout_time == None:
             logout_user()
+            flash('This session has been invalidated')
         elif datetime.now() >= current_user.logout_time:
             current_user.logout_time = None
             db.session.commit()
