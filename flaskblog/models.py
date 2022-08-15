@@ -26,7 +26,7 @@ class User(db.Model, UserMixin):
     posts = db.relationship('Post', backref='author', lazy=True)
     mfa = db.Column(db.Boolean, default=False, nullable=False)
     comments = db.relationship('Comment', backref='user', lazy=True)
-
+    logout_time = db.Column(db.DateTime)
 
 
 
