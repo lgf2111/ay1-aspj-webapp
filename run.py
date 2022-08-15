@@ -1,8 +1,10 @@
-from flaskblog import create_app
+from wsgiref.handlers import format_date_time
+from flaskblog import create_app, db
 from flask import session, g
-from flask_login import current_user
 import datetime
-from datetime import timedelta
+from datetime import timedelta, datetime
+from flask_login import current_user, logout_user
+
 # from OpenSSL import SSL
 # context = SSL.Context(SSL.PROTOCOL_TLSv1_2)
 # context.use_privatekey_file('server.key')
@@ -12,11 +14,19 @@ app = create_app()
 
 @app.before_request
 def before_request():
+    if current_user.is_active:
+        if current_user.logout_time == None:
+            logout_user()
+        elif datetime.now() >= current_user.logout_time:
+            current_user.logout_time = None
+            db.session.commit()
+            logout_user()
+        
+
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=5)
+    app.permanent_session_lifetime = timedelta(seconds=30)
     session.modified = True
     g.user = current_user
-
     
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ from flaskblog.users.forms import (MfaForm, RegistrationForm, LoginForm, UpdateA
                                    RequestResetForm, ResetPasswordForm, MfaForm, password_errors)
 from flaskblog.users.utils import save_picture, send_reset_email, send_alert_email, send_mfa_email
 import datetime
-from datetime import timedelta
+from datetime import date, timedelta
 
 
 
@@ -38,6 +38,7 @@ def register():
     form = RegistrationForm()
     session.pop('_flashes', None)
     if form.validate_on_submit():
+        form.email.data = form.email.data.lower()
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
         db.session.add(user)
@@ -61,6 +62,7 @@ def login():
         return redirect(url_for('main.home'))
     form = LoginForm()
     if form.validate_on_submit():
+        form.email.data = form.email.data.lower()
         output = lambda login_attempt, state, username: f"Login Attempt {login_attempt} ({state}): {username}"
         user = User.query.filter_by(email=form.email.data).first()
         if user.login_attempt > 10:
@@ -78,12 +80,17 @@ def login():
                 flash('An email has been sent for verification.', 'info')
                 return redirect(url_for('users.login')) #calls function OTP function
 
-            login_user(user, remember=form.remember.data)
+            
 
+            login_user(user, remember=form.remember.data)
+            
+            current_time = datetime.datetime.now()
+            user.logout_time = current_time + timedelta(hours=1)
             users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
             user.login_attempt = 0
             next_page = request.args.get('next')
-    
+            db.session.commit()
+
             return redirect(next_page) if next_page else redirect(url_for('main.home'))
         else:
             user.login_attempt += 1
@@ -101,6 +108,10 @@ def mfa_token(token):
         return redirect(url_for('users.login'))
     else:
         login_user(user)
+        current_time = datetime.datetime.now()
+        user.logout_time = current_time + timedelta(hours=1)
+        db.session.commit()
+
         flash('Logged in successful.', 'success')
         return redirect(url_for('main.home'))
 
@@ -110,6 +121,8 @@ def mfa_token(token):
 @users.route("/logout")
 def logout():
     username = current_user.username
+    current_user.logout_time = None
+    db.session.commit()
     logout_user()
     
     users_logger.info(f"User Logged Out: {username}")
