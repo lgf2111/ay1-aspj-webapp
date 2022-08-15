@@ -72,6 +72,9 @@ def login():
         key = os.environ.get('SECRET_KEY')[16:].encode()
         output = lambda login_attempt, state, username: f"Login Attempt {login_attempt} ({state}): {username}"
         user = User.query.filter_by(email=form.email.data).first()
+        if not user:
+            flash('Please check your email and password', 'danger')
+            return redirect(url_for('users.login'))
         if isinstance(user.encrypted_password, str):
             user.encrypted_password = eval(user.encrypted_password)
         if isinstance(user.nonce, str):
