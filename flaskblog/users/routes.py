@@ -1,5 +1,5 @@
 from time import time
-from flask import render_template, url_for, flash, redirect, request, Blueprint, session
+from flask import render_template, url_for, flash, redirect, request, Blueprint, session, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from flaskblog import db, bcrypt, errors, users_logger
 from flaskblog.models import User, Post
@@ -86,7 +86,6 @@ def login():
             users_logger.critical(f"Password manipulated: {user.username}")
         if user.login_attempt > 10:
             flash('Your account has been locked.', 'danger')
-
             if user.login_attempt <= 15:
                 users_logger.warning(f"Login Attempt {user.login_attempt} (Locked): {user.username}")
             else:
@@ -222,7 +221,7 @@ def reset_token(token):
     session.pop('_flashes', None)
     
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        hashed_password = bcrypt.generate_password_hash(form.password.data)
         key = os.environ.get('SECRET_KEY')[16:].encode()
         cipher = AES.new(key, AES.MODE_EAX)
         nonce = cipher.nonce

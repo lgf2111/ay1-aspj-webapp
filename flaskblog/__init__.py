@@ -42,6 +42,7 @@ stripe_keys = {
     'publishable_key': os.environ['STRIPE_PUBLISHABLE_KEY']
 }
 stripe.api_key = stripe_keys['secret_key']
+print(stripe_keys)
 
 root_logger = setup_logger('', 'logs/root.log')
 users_logger = setup_logger('users', 'logs/users.log')

@@ -105,3 +105,7 @@ def new_comment(post_id):
             flash('Post do not exist.', 'error')
     return redirect(url_for('main.home'))
 
+
+@posts.route("/post/<int:post_id>/edit",)
+def edit_post(post_id):
+    abort(403)
