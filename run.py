@@ -17,10 +17,11 @@ def before_request():
             db.session.commit()
             flash('Your session is invalid.', 'info')
             logout_user()
+            flash('This session has ended', 'danger')
         
 
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=5)
+    app.permanent_session_lifetime = timedelta(minutes=10)
     session.modified = True
     g.user = current_user
     

@@ -72,6 +72,9 @@ def login():
         key = os.environ.get('SECRET_KEY')[16:].encode()
         output = lambda login_attempt, state, username: f"Login Attempt {login_attempt} ({state}): {username}"
         user = User.query.filter_by(email=form.email.data).first()
+        if not user:
+            flash('Please check your email and password', 'danger')
+            return redirect(url_for('users.login'))
         if isinstance(user.encrypted_password, str):
             user.encrypted_password = eval(user.encrypted_password)
         if isinstance(user.nonce, str):
@@ -84,7 +87,7 @@ def login():
             cipher.verify(user.tag)
         except ValueError:
             users_logger.critical(f"Password manipulated: {user.username}")
-        if user.login_attempt > 10:
+        if user.login_attempt >= 5:
             flash('Your account has been locked.', 'danger')
             if user.login_attempt <= 15:
                 users_logger.warning(f"Login Attempt {user.login_attempt} (Locked): {user.username}")
@@ -104,7 +107,7 @@ def login():
             login_user(user, remember=form.remember.data)
             
             current_time = datetime.datetime.now()
-            user.logout_time = current_time + timedelta(hours=1)
+            user.logout_time = current_time + timedelta(minutes=30)
             users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
             user.login_attempt = 0
             next_page = request.args.get('next')
