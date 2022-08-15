@@ -16,6 +16,7 @@ def load_user(user_id):
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
+    is_premium = db.Column(db.Boolean, nullable=False, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False, default=1)
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')

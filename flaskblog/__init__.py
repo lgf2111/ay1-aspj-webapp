@@ -18,8 +18,6 @@ import dotenv
 from flaskblog.logger import setup_logger
 from flaskblog.config import Config
 
-import os
-
 
 sentry_sdk.init(
     dsn=os.environ.get('SENTRY_SDK_DSN'),
@@ -49,6 +47,7 @@ stripe.api_key = stripe_keys['secret_key']
 root_logger = setup_logger('', 'logs/root.log')
 users_logger = setup_logger('users', 'logs/users.log')
 posts_logger = setup_logger('posts', 'logs/posts.log')
+api_logger = setup_logger('api', 'logs/api.log')
 
 
 

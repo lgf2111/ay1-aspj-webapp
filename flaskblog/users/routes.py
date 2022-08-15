@@ -60,6 +60,12 @@ def login():
         key = os.environ.get('SECRET_KEY')[16:].encode()
         output = lambda login_attempt, state, username: f"Login Attempt {login_attempt} ({state}): {username}"
         user = User.query.filter_by(email=form.email.data).first()
+        if isinstance(user.encrypted_password, str):
+            user.encrypted_password = eval(user.encrypted_password)
+        if isinstance(user.nonce, str):
+            user.nonce = eval(user.nonce)
+        if isinstance(user.tag, str):
+            user.tag = eval(user.tag)
         cipher = AES.new(key, AES.MODE_EAX, nonce=user.nonce)
         hashed_password = cipher.decrypt(user.encrypted_password)
         try:
@@ -70,6 +76,7 @@ def login():
             flash('Login Unsuccessful. Please check email and password', 'danger')
             users_logger.warning(output(0, 'Does Not Exist', form.email.data))
         elif user and bcrypt.check_password_hash(hashed_password, form.password.data) and user.login_attempt <= 10:
+            session['dashboard_logged_in'] = True
             login_user(user, remember=form.remember.data)
             users_logger.info(output(user.login_attempt, 'Successful', user.username))
             user.login_attempt = 0
@@ -95,6 +102,9 @@ def login():
 
 @users.route("/logout")
 def logout():
+    if not current_user.is_authenticated:
+        flash('You are not logged in yet.', 'danger')
+        return redirect(url_for('users.login'))
     username = current_user.username
     logout_user()
     users_logger.info(f"User Logged Out: {username}")

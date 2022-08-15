@@ -4,13 +4,18 @@ from flask_login import current_user, login_required
 from flaskblog.models import Post, Comment
 from flaskblog import db, posts_logger
 from flaskblog.posts.forms import PostForm
+from datetime import datetime
 
 posts = Blueprint('posts', __name__)
 
 
-@posts.route("/post/new", methods=['GET', 'POST'])
+@posts.route("/post/create", methods=['GET', 'POST'])
 @login_required
 def new_post():
+    if not current_user.is_premium:
+        if current_user.posts[-1].date_posted.date() == datetime.today().date():
+            flash("You had already posted for today, upgrade premium to have no posting limit!", "warning")
+            return redirect(url_for("main.home"))
     form = PostForm()
     if form.validate_on_submit():
         post = Post(title=form.title.data, content=form.content.data, author=current_user)

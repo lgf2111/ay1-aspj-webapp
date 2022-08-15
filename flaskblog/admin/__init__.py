@@ -11,7 +11,7 @@ class HomeAdminView(AdminIndexView):
         return current_user.role_id == 2
     
     def inaccessible_callback(self, name, **kwargs):
-        flash("Please log in to access this page.", "info")
+        flash("You don't have permission to access this page.", "info")
         return redirect(url_for('users.login', next=request.url))
 
 class AdminMixin:
@@ -27,4 +27,4 @@ class AdminView(AdminMixin, ModelView):
         if current_user.is_authenticated:
             return current_user.role_id == 2
 
-admin = Admin(name='Flask Blog', template_mode='bootstrap4', url='/', index_view=HomeAdminView(name='Home'))
+admin = Admin(name='Flask Blog', template_mode='bootstrap4', index_view=HomeAdminView(name='Home'))
