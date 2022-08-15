@@ -25,3 +25,11 @@
     An Access Control Matrix refers to a table that defines the access permissions between specific user roles. By using this table matix, it can help admins to determine who can access a given object, as well as revoke all access to an object.
 
 
+### **Password Policy**
+-----
+
+    Password Complexity requirement:
+    Min 12 characters long
+    Max 64 characters long
+    Must include at least 1 special charactersource
+    Must have at least 1 capital letter
