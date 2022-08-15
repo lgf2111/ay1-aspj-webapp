@@ -4,6 +4,7 @@ from flask.json import jsonify
 from flask_login import current_user
 from flaskblog import stripe_keys
 from flaskblog.models import Post
+from flask_csp.csp import csp_header
 from flaskblog.main.forms import PaymentForm
 import urllib
 import json
@@ -11,9 +12,15 @@ import stripe
 
 main = Blueprint('main', __name__)
 
+@main.after_request
+def add_security_headers(resp):
+    resp.headers['Content-Security-Policy']="script-src 'self'"
+    return resp
+
 
 @main.route("/")
 @main.route("/home")
+@csp_header({'script-src':"'self'"})
 def home():
     page = request.args.get('page', 1, type=int)
     posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)

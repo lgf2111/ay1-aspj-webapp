@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 import flask_monitoringdashboard as dashboard
@@ -44,6 +44,7 @@ posts_logger = setup_logger('posts', 'logs/posts.log')
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(Config)
+    app.config.update(SESSION_COOKIE_SECURE = True, SESSION_COOKIE_HTTPONLY = True, SESSION_COOKIE_SAMESITE='Lax')
     sentry_sdk.init(
         dsn="https://bc8b621ab5b241bdba1939206c8a35dc@o1276780.ingest.sentry.io/6605916",
         integrations=[

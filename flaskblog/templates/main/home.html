@@ -21,7 +21,7 @@
                     {{ comment.user.username }}
                   </a>
                   <p class="">
-                    {{ comment.text }}
+                    {{ comment.text | safe}}
                   </p>
                 </div>
               {% endfor %}

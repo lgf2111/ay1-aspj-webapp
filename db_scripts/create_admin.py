@@ -10,6 +10,7 @@ from flaskblog import db, create_app, bcrypt
 from flaskblog.models import *
 app = create_app()
 with app.app_context():
+    # user = User(username='test', role_id=2, email='test@gmail.com', password=bcrypt.generate_password_hash('Password1234%').decode('utf-8'))
     user = User(username='213587x', role_id=2, email='213587x@gmail.com', password=bcrypt.generate_password_hash('Year2Semester1').decode('utf-8'))
     db.session.add(user)
     db.session.commit()
