@@ -11,15 +11,15 @@ def before_request():
     if current_user.is_active:
         if current_user.logout_time == None:
             logout_user()
-            flash('This session has been invalidated')
         elif datetime.now() >= current_user.logout_time:
             current_user.logout_time = None
             db.session.commit()
             logout_user()
+            flash('This session has ended', 'danger')
         
 
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=5)
+    app.permanent_session_lifetime = timedelta(minutes=10)
     session.modified = True
     g.user = current_user
     
