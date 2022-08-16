@@ -27,7 +27,7 @@
   </a></br>
   <a href="https://owasp.org/www-project-top-ten/2017/A10_2017-Insufficient_Logging%2526Monitoring">A10:2017-Insufficient Logging & Monitoring
   </a>
-
+<br>
 <br>
 </p>
 <p align="center">
@@ -94,6 +94,16 @@ $ python run.py
 > 
 > If `python` doesn't work, try `python3`.
 
+> **Warning**
+> 
+> This web application uses environmental variables. You will need to have them before running the it:
+> - [EMAIL_USER]()
+> - [EMAIL_PASS](https://support.google.com/accounts/answer/185833?hl=en)
+> - [SECRET_KEY](https://stackoverflow.com/questions/34902378/where-do-i-get-a-secret-key-for-flask)
+> - [SQLALCHEMY_DATABASE_URI](https://stackoverflow.com/questions/43466927/sqlalchemy-database-uri-not-set)
+> - [STRIPE_PUBLISHABLE_KEY](https://stripe.com/docs/keys)
+> - [STRIPE_SECRET_KEY](https://stripe.com/docs/keys)
+> - [SENTRY_SDK_DSN](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)
 
 ## Contributors
 
