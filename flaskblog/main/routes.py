@@ -1,13 +1,8 @@
-
 from flask import render_template, request, Blueprint, redirect, url_for, flash, abort
-from flask.json import jsonify
 from flask_login import current_user
 from flaskblog import stripe_keys, api_logger, users_logger, db
 from flaskblog.models import Post
 from flask_csp.csp import csp_header
-from flaskblog.main.forms import PaymentForm
-import urllib
-import json
 import stripe
 
 main = Blueprint('main', __name__)

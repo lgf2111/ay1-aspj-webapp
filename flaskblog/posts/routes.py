@@ -5,17 +5,11 @@ from flaskblog.models import Post, Comment
 from flaskblog import db, posts_logger
 from flaskblog.posts.forms import PostForm
 from datetime import datetime
-from flask_csp.csp import csp_header
 import re
 
 
 
 posts = Blueprint('posts', __name__)
-
-# @posts.after_request
-# def add_security_headers(resp):
-#     resp.headers['Content-Security-Policy']="script-src 'self'"
-#     return resp
 
 
 @posts.route("/post/create", methods=['GET', 'POST'])

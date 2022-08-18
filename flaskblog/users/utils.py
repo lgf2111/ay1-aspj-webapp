@@ -1,6 +1,5 @@
 import os
 import secrets
-import threading
 from PIL import Image
 from datetime import datetime
 from flask import url_for, current_app

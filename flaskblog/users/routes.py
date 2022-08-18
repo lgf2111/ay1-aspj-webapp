@@ -1,13 +1,11 @@
-from time import time
 from flask import render_template, url_for, flash, redirect, request, Blueprint, session, abort
 from flask_login import login_user, current_user, logout_user, login_required
-from flaskblog import db, bcrypt, errors, users_logger
+from flaskblog import db, bcrypt, users_logger
 from flaskblog.models import User, Post
-from flaskblog.users.forms import (MfaForm, RegistrationForm, LoginForm, UpdateAccountForm,
-                                   RequestResetForm, ResetPasswordForm, MfaForm, password_errors)
+from flaskblog.users.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
+                                   RequestResetForm, ResetPasswordForm, password_errors)
 from flaskblog.users.utils import save_picture, send_reset_email, send_alert_email, send_mfa_email
-import datetime
-from datetime import date, timedelta
+from datetime import datetime, timedelta
 import os
 from Crypto.Cipher import AES
 
@@ -90,7 +88,7 @@ def login():
             session['dashboard_logged_in'] = True
             login_user(user, remember=form.remember.data)
             
-            current_time = datetime.datetime.now()
+            current_time = datetime.now()
             user.logout_time = current_time + timedelta(minutes=30)
             users_logger.info(f"Login Attempt {user.login_attempt} (Successful): {user.username}")
             user.login_attempt = 0
@@ -122,7 +120,7 @@ def mfa_token(token):
     else:
         login_user(user)
         session['dashboard_logged_in'] = True
-        current_time = datetime.datetime.now()
+        current_time = datetime.now()
         user.logout_time = current_time + timedelta(hours=1)
         user.login_attempt = 0
         db.session.commit()

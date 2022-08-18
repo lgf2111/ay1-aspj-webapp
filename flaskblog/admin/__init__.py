@@ -1,7 +1,7 @@
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 
-from flask import flash, redirect, url_for, request
+from flask import flash, redirect, url_for
 from flask_login import current_user
 
 class HomeAdminView(AdminIndexView):

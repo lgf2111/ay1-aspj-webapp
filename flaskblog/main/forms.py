@@ -1,7 +1,3 @@
-# Local imports
-import datetime
-
-# External imports
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, DecimalField, SelectField
 from wtforms.validators import DataRequired, Length

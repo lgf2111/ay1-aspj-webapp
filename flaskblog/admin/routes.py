@@ -1,4 +1,4 @@
-from flask import render_template, request, Blueprint
+from flask import render_template, Blueprint
 
 
 admin = Blueprint('admin', __name__)
