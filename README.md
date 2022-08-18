@@ -84,8 +84,25 @@ $ cd flask-blog-secure
 # Install dependencies
 $ pip install -r requirements.txt
 
-# Run the app
+# Run the app 
+# (Make sure have enrivonment variables ready)
 $ python run.py
+```
+
+There are [scripts](.//db_scripts/) for you to use to manipulate the database with ease:
+
+```bash
+# Create/Recreate database
+# (Make sure have enrivonment variables ready)
+$ python db_scripts/create_db.py
+
+# Make specific user admin (Eg: lgf2111)
+$ python db_scripts/make_admin.py
+$ Username: lgf2111
+
+# Reset login attempt for specific user (Eg: lgf2111)
+$ python db_scripts/reset_login_attempt.py
+$ Username: lgf2111
 ```
 
 > **Note**
@@ -93,6 +110,8 @@ $ python run.py
 > If `pip` doesn't work, try `pip3`. 
 > 
 > If `python` doesn't work, try `python3`.
+>
+
 
 > **Warning**
 > 
@@ -104,6 +123,7 @@ $ python run.py
 > - [STRIPE_PUBLISHABLE_KEY](https://stripe.com/docs/keys)
 > - [STRIPE_SECRET_KEY](https://stripe.com/docs/keys)
 > - [SENTRY_SDK_DSN](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)
+
 
 ## Contributors
 
