@@ -124,6 +124,31 @@ $ Username: lgf2111
 > - [STRIPE_SECRET_KEY](https://stripe.com/docs/keys)
 > - [SENTRY_SDK_DSN](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)
 
+> To get the environment variables we'd used, you'll need to export them by running this in your command line:
+> ```bash
+> # Export environmental variables in current shell
+> $ source env-export.sh
+>
+> # Environmental variables exported are temporary, to manually remove, run this
+> $ source env-unset.sh
+> ```
+> ```bash
+> Windows:
+> # Export environmental variables in current shell:
+> $ Env:EMAIL_USER="213587x@gmail.com" 
+> $ Env:EMAIL_PASS="fkqkqjbmjvsisbic" 
+> $ Env:SECRET_KEY="5791628bb0b13ce0c676dfde280ba245" 
+> $ Env:SQLALCHEMY_DATABASE_URI="sqlite:///site.db" 
+> $ Env:STRIPE_PUBLISHABLE_KEY="pk_test_51KSAWdIh0gkoD8L83DDO7vbBvmC16lk4f6SwHoP9q2cdE3f517t75LXKqkjUeKPrypWOTSAxGVvUUOMl4WFRX0Rh00DF92sQn1" 
+> $ Env:STRIPE_SECRET_KEY="sk_test_51KSAWdIh0gkoD8L8FfHd5ZcBYn3m54by2WPc3PLc543DB0tWnR0h58S4A51KFzHaPwFGwxJ8N6262CNR7sEnwl5i00g99nryQJ" 
+> $ Env:SENTRY_SDK_DSN="https://bc8b621ab5b241bdba1939206c8a35dc@o1276780.ingest.sentry.io/6605916"
+> 
+> # To run the whole app, run this in current shell:
+> $ cd .\flask-blog-secure-submission\
+>
+> $ py run.py
+> ```
+
 
 ## Contributors
 
